@@ -15,12 +15,16 @@ instantly see the USD and EUR equivalents at the latest exchange rate.
 Argentina "world-cup shirt" theme: celeste-and-white vertical stripes, **3 gold
 stars** (the three World Cups) and a stylized **Malvinas** islands silhouette.
 
-## Run
+## Live
+Once GitHub Pages is enabled (Settings → Pages → Deploy from branch → `main` / root):
+**https://franvillanu.github.io/ars-converter/**
+
+## Run locally
 It's a single static file — no build step. Open `index.html`, or serve the folder:
 
 ```bash
 python3 -m http.server 8080
-# then open http://localhost:8080/ars-converter/
+# then open http://localhost:8080/
 ```
 
 ## Rates
