@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#75AADB">
+<title>Peso ARS → USD / EUR</title>
+<style>
+  :root{
+    --celeste:#75AADB;
+    --celeste-deep:#4a90c4;
+    --gold:#f6b40e;
+    --ink:#0d2b45;
+    --white:#ffffff;
+    --usd:#2e8b57;
+    --eur:#3b5bdb;
+    --card:rgba(255,255,255,0.92);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    min-height:100dvh;
+    /* Argentina jersey: celeste + white vertical stripes */
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--celeste) 0,
+        var(--celeste) 32px,
+        #82b4e0 32px,
+        #82b4e0 64px
+      );
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px);
+  }
+
+  .shell{
+    width:100%;
+    max-width:480px;
+    margin:auto;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    padding-top:22px;
+  }
+
+  /* ---- Header / crest ---- */
+  header{text-align:center;color:var(--white);}
+  .stars{display:flex;justify-content:center;gap:10px;margin-bottom:6px;}
+  .stars svg{width:26px;height:26px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));}
+  h1{font-size:1.5rem;font-weight:800;letter-spacing:.5px;text-shadow:0 1px 2px rgba(0,0,0,.28);}
+  .subtitle{font-size:.8rem;opacity:.95;margin-top:2px;font-weight:600;text-shadow:0 1px 1px rgba(0,0,0,.25);}
+
+  .malvinas{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:8px;color:var(--white);}
+  .malvinas svg{width:64px;height:auto;opacity:.95;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));}
+  .malvinas span{font-size:.66rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.9;}
+
+  /* ---- Input card ---- */
+  .input-card{
+    background:var(--card);
+    border-radius:22px;
+    padding:20px 18px 18px;
+    box-shadow:0 10px 30px rgba(13,43,69,.25);
+    backdrop-filter:blur(4px);
+  }
+  .input-label{
+    display:flex;align-items:center;gap:8px;
+    font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+    color:var(--celeste-deep);margin-bottom:6px;
+  }
+  .flag-dot{width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(246,180,14,.25);}
+  .amount-wrap{display:flex;align-items:baseline;gap:8px;}
+  .cur{font-size:1.8rem;font-weight:800;color:var(--ink);opacity:.55;}
+  #amount{
+    flex:1;min-width:0;
+    border:none;background:transparent;outline:none;
+    font-size:2.9rem;font-weight:800;color:var(--ink);
+    width:100%;
+    font-variant-numeric:tabular-nums;
+  }
+  #amount::placeholder{color:#9db4c7;}
+
+  /* ---- Result columns ---- */
+  .results{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .col{
+    background:var(--card);
+    border-radius:20px;
+    padding:16px 14px;
+    text-align:center;
+    box-shadow:0 8px 22px rgba(13,43,69,.18);
+    border-top:5px solid var(--celeste);
+  }
+  .col.usd{border-top-color:var(--usd);}
+  .col.eur{border-top-color:var(--eur);}
+  .col .code{font-size:.9rem;font-weight:800;letter-spacing:1px;}
+  .col.usd .code{color:var(--usd);}
+  .col.eur .code{color:var(--eur);}
+  .col .flag{font-size:1.4rem;line-height:1;margin-bottom:4px;}
+  .col .value{font-size:1.65rem;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums;word-break:break-word;}
+  .col .rate{font-size:.66rem;color:#5b7488;margin-top:6px;font-weight:600;}
+
+  /* ---- Footer / status ---- */
+  .status{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    color:var(--white);font-size:.72rem;font-weight:600;text-shadow:0 1px 1px rgba(0,0,0,.25);
+    flex-wrap:wrap;text-align:center;
+  }
+  .status .dot{width:8px;height:8px;border-radius:50%;background:#8fd19e;}
+  .status.err .dot{background:#ff6b6b;}
+  .status.loading .dot{background:var(--gold);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+  .refresh{
+    background:rgba(255,255,255,.9);color:var(--celeste-deep);
+    border:none;border-radius:999px;padding:6px 14px;
+    font-size:.72rem;font-weight:800;cursor:pointer;
+    box-shadow:0 3px 8px rgba(13,43,69,.2);
+  }
+  .refresh:active{transform:scale(.96);}
+
+  .rate-toggle{display:flex;justify-content:center;gap:6px;margin-top:2px;}
+  .rate-toggle button{
+    background:rgba(255,255,255,.85);color:var(--celeste-deep);
+    border:2px solid transparent;border-radius:999px;
+    padding:5px 12px;font-size:.7rem;font-weight:800;cursor:pointer;
+  }
+  .rate-toggle button.active{background:var(--white);border-color:var(--gold);color:var(--ink);}
+</style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="stars" aria-label="3 estrellas mundiales">
+        <!-- 3 gold stars = 3 World Cups -->
+        <svg viewBox="0 0 24 24" fill="#f6b40e"><path d="M12 2l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.8 6.1 20.8l1.2-6.6L2.4 9l6.7-.9z"/></svg>
+        <svg viewBox="0 0 24 24" fill="#f6b40e"><path d="M12 2l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.8 6.1 20.8l1.2-6.6L2.4 9l6.7-.9z"/></svg>
+        <svg viewBox="0 0 24 24" fill="#f6b40e"><path d="M12 2l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.8 6.1 20.8l1.2-6.6L2.4 9l6.7-.9z"/></svg>
+      </div>
+      <h1>Conversor de Pesos</h1>
+      <div class="subtitle">ARS → USD · EUR · cotización en vivo</div>
+
+      <div class="malvinas" title="Las Malvinas son argentinas">
+        <!-- Stylized Malvinas islands silhouette -->
+        <svg viewBox="0 0 120 60" fill="currentColor" aria-hidden="true">
+          <!-- Gran Malvina (west) -->
+          <path d="M8 30 C6 22 12 16 20 15 C28 14 33 20 36 22 C40 25 44 24 46 28 C48 33 44 38 40 41 C34 45 30 44 24 43 C15 42 10 38 8 30 Z"/>
+          <!-- Isla Soledad (east) -->
+          <path d="M58 22 C62 15 72 13 82 16 C92 19 100 17 106 22 C112 27 110 33 104 35 C100 37 98 33 94 34 C90 35 90 40 84 42 C77 44 72 40 68 42 C63 44 58 41 57 36 C56 31 55 27 58 22 Z"/>
+        </svg>
+        <span>Malvinas</span>
+      </div>
+    </header>
+
+    <section class="input-card">
+      <label class="input-label" for="amount"><span class="flag-dot"></span> Pesos argentinos (ARS)</label>
+      <div class="amount-wrap">
+        <span class="cur">$</span>
+        <input id="amount" type="text" inputmode="decimal" placeholder="0" autocomplete="off" enterkeyhint="done" aria-label="Monto en pesos argentinos">
+      </div>
+    </section>
+
+    <div class="rate-toggle" id="rateToggle" aria-label="Tipo de cotización">
+      <button data-rate="blue" class="active">Blue</button>
+      <button data-rate="oficial">Oficial</button>
+    </div>
+
+    <section class="results">
+      <div class="col usd">
+        <div class="flag">🇺🇸</div>
+        <div class="code">USD</div>
+        <div class="value" id="usdVal">—</div>
+        <div class="rate" id="usdRate">cargando…</div>
+      </div>
+      <div class="col eur">
+        <div class="flag">🇪🇺</div>
+        <div class="code">EUR</div>
+        <div class="value" id="eurVal">—</div>
+        <div class="rate" id="eurRate">cargando…</div>
+      </div>
+    </section>
+
+    <div class="status loading" id="status">
+      <span class="dot"></span>
+      <span id="statusText">Obteniendo cotización…</span>
+      <button class="refresh" id="refresh">Actualizar</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  var API = {
+    blue:    "https://dolarapi.com/v1/dolares/blue",
+    oficial: "https://dolarapi.com/v1/dolares/oficial",
+    eur:     "https://dolarapi.com/v1/cotizaciones/eur"          // euro "blue"/informal
+  };
+  var LS_KEY = "ars_conv_rates_v1";
+
+  var state = {
+    rateType: "blue",          // blue | oficial
+    rates: { blue:null, oficial:null, eur:null, ts:null }
+  };
+
+  var $amount   = document.getElementById("amount");
+  var $usdVal   = document.getElementById("usdVal");
+  var $eurVal   = document.getElementById("eurVal");
+  var $usdRate  = document.getElementById("usdRate");
+  var $eurRate  = document.getElementById("eurRate");
+  var $status   = document.getElementById("status");
+  var $statusTx = document.getElementById("statusText");
+  var $refresh  = document.getElementById("refresh");
+  var $toggle   = document.getElementById("rateToggle");
+
+  var nfARS = new Intl.NumberFormat("es-AR", {minimumFractionDigits:0, maximumFractionDigits:2});
+  var nfMoney = new Intl.NumberFormat("es-AR", {minimumFractionDigits:2, maximumFractionDigits:2});
+  var nfRate = new Intl.NumberFormat("es-AR", {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  // ---------- parsing / formatting of the ARS input ----------
+  // es-AR: "." thousands, "," decimals. Keep quick typing painless.
+  function parseAmount(str){
+    if(!str) return 0;
+    var cleaned = str.replace(/\./g,"").replace(/,/g,".").replace(/[^0-9.]/g,"");
+    var parts = cleaned.split(".");
+    if(parts.length > 2){ cleaned = parts[0] + "." + parts.slice(1).join(""); }
+    var n = parseFloat(cleaned);
+    return isFinite(n) ? n : 0;
+  }
+
+  function formatLiveInput(raw){
+    // preserve a trailing decimal comma while typing
+    var hasComma = raw.indexOf(",") !== -1;
+    var digits = raw.replace(/\./g,"");
+    var intPart, decPart="";
+    if(hasComma){
+      var idx = digits.indexOf(",");
+      intPart = digits.slice(0, idx).replace(/[^0-9]/g,"");
+      decPart = digits.slice(idx+1).replace(/[^0-9]/g,"").slice(0,2);
+    } else {
+      intPart = digits.replace(/[^0-9]/g,"");
+    }
+    if(intPart === "") intPart = "0";
+    var intNum = parseInt(intPart,10) || 0;
+    var out = nfARS.format(intNum);
+    if(hasComma){ out += "," + decPart; }
+    return out;
+  }
+
+  // ---------- rates ----------
+  function currentUsdRate(){
+    var r = state.rates[state.rateType];
+    return r && r.venta ? r.venta : null;
+  }
+  function currentEurRate(){
+    var r = state.rates.eur;
+    return r && r.venta ? r.venta : null;
+  }
+
+  function render(){
+    var amount = parseAmount($amount.value);
+    var uRate = currentUsdRate();
+    var eRate = currentEurRate();
+
+    if(uRate){
+      $usdVal.textContent = "US$ " + nfMoney.format(amount / uRate);
+      $usdRate.textContent = "1 USD = $" + nfRate.format(uRate);
+    }
+    if(eRate){
+      $eurVal.textContent = "€ " + nfMoney.format(amount / eRate);
+      $eurRate.textContent = "1 EUR = $" + nfRate.format(eRate);
+    }
+  }
+
+  function setStatus(kind, text){
+    $status.className = "status " + kind;
+    $statusTx.textContent = text;
+  }
+
+  function saveCache(){
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(state.rates)); }catch(e){}
+  }
+  function loadCache(){
+    try{
+      var c = JSON.parse(localStorage.getItem(LS_KEY));
+      if(c && (c.blue || c.oficial || c.eur)){ state.rates = c; return true; }
+    }catch(e){}
+    return false;
+  }
+
+  function fetchJSON(url){
+    return fetch(url, {cache:"no-store"}).then(function(r){
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      return r.json();
+    });
+  }
+
+  function refresh(){
+    setStatus("loading","Obteniendo cotización…");
+    Promise.allSettled([
+      fetchJSON(API.blue),
+      fetchJSON(API.oficial),
+      fetchJSON(API.eur)
+    ]).then(function(res){
+      var got = false;
+      if(res[0].status==="fulfilled"){ state.rates.blue = res[0].value; got = true; }
+      if(res[1].status==="fulfilled"){ state.rates.oficial = res[1].value; got = true; }
+      if(res[2].status==="fulfilled"){ state.rates.eur = res[2].value; got = true; }
+
+      if(got){
+        state.rates.ts = Date.now();
+        saveCache();
+        render();
+        setStatus("ok","Cotización actualizada · " + timeLabel(state.rates.ts));
+      } else {
+        useCacheOrFail();
+      }
+    }).catch(useCacheOrFail);
+  }
+
+  function useCacheOrFail(){
+    if(state.rates.blue || state.rates.oficial || state.rates.eur){
+      render();
+      setStatus("err","Sin conexión — mostrando última cotización" + (state.rates.ts ? " · " + timeLabel(state.rates.ts) : ""));
+    } else {
+      setStatus("err","No se pudo obtener la cotización. Tocá Actualizar.");
+    }
+  }
+
+  function timeLabel(ts){
+    try{
+      return new Date(ts).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
+    }catch(e){ return ""; }
+  }
+
+  // ---------- events ----------
+  $amount.addEventListener("input", function(){
+    var pos = $amount.selectionStart;
+    var before = $amount.value.length;
+    $amount.value = formatLiveInput($amount.value);
+    // best-effort caret keep
+    var after = $amount.value.length;
+    var newPos = Math.max(0, pos + (after - before));
+    try{ $amount.setSelectionRange(newPos,newPos); }catch(e){}
+    render();
+  });
+
+  $refresh.addEventListener("click", refresh);
+
+  $toggle.addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-rate]");
+    if(!btn) return;
+    state.rateType = btn.getAttribute("data-rate");
+    Array.prototype.forEach.call($toggle.querySelectorAll("button"), function(b){
+      b.classList.toggle("active", b === btn);
+    });
+    render();
+  });
+
+  // ---------- init ----------
+  if(loadCache()){ render(); if(state.rates.ts) setStatus("ok","Última cotización · "+timeLabel(state.rates.ts)); }
+  $amount.focus();
+  refresh();
+  // auto-refresh when app regains focus
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) refresh(); });
+})();
+</script>
+</body>
+</html>
