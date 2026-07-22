@@ -8,7 +8,10 @@ on the built-in keypad and watch the USD and EUR equivalents update live.
 ## Features
 - **Bespoke numeric keypad** — no OS keyboard; big one-handed targets, press
   animation, haptic feedback, and `+1K / +10K / +100K` quick-add chips.
-- Two result columns: **USD** and **EUR**, with animated count-up values.
+- **Edit any field** — tap ARS, USD, or EUR to make it the input; the other two
+  convert automatically (enter dollars → see pesos, etc.).
+- Sun/moon **theme toggle** (persists your choice, else follows the system).
+- Two result columns: **USD** and **EUR**.
 - Four markets in a sliding segmented control: **Blue · Oficial · MEP · Tarjeta**.
 - Buy/sell spread and last-updated time per rate. EUR tracks the selected market
   (scaled off the official euro; estimates flagged with `*`).
