@@ -160,10 +160,8 @@
   .rc .rate{font-size:.66rem;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;}
   .rc .spread{font-size:.58rem;color:var(--ink-3);font-variant-numeric:tabular-nums;}
 
-  .edit-hint{text-align:center;font-size:.62rem;font-weight:600;color:var(--ink-3);margin-top:9px;opacity:.85;}
-
   /* ---------- status ---------- */
-  .status{display:flex;align-items:center;justify-content:center;gap:7px;margin:6px 0 2px;font-size:.66rem;font-weight:600;color:var(--ink-3);}
+  .status{display:flex;align-items:center;justify-content:center;gap:7px;margin:11px 0 0;font-size:.66rem;font-weight:600;color:var(--ink-3);}
   .status .dot{width:7px;height:7px;border-radius:50%;background:#33c481;box-shadow:0 0 0 3px rgba(51,196,129,.16);}
   .status.err .dot{background:#ef5b5b;box-shadow:0 0 0 3px rgba(239,91,91,.16);}
   .status.loading .dot{background:var(--gold);animation:pulse 1s infinite;}
@@ -248,13 +246,6 @@
       </div>
     </section>
 
-    <div class="edit-hint">Tocá cualquier monto para editarlo ✎</div>
-
-    <div class="status loading" id="status">
-      <span class="dot"></span>
-      <span id="statusText">Obteniendo cotización…</span>
-    </div>
-
     <div class="keypad-wrap">
       <div class="quick" id="quick">
         <button data-add="1000">+1K</button>
@@ -278,6 +269,11 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H8L2 12l6 7h13a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1Z"/><path d="M15 9l-4 6M11 9l4 6"/></svg>
         </button>
       </div>
+    </div>
+
+    <div class="status loading" id="status">
+      <span class="dot"></span>
+      <span id="statusText">Obteniendo cotización…</span>
     </div>
   </div>
 
