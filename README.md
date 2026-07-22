@@ -1,26 +1,28 @@
-# Conversor de Pesos — ARS → USD / EUR
+# Pesos — ARS → USD / EUR
 
-Mobile-first, single-file converter. Type an amount in Argentine pesos (ARS) and
-instantly see the USD and EUR equivalents at the latest exchange rate.
+Mobile-first, single-file peso converter. Punch in an amount in Argentine pesos
+on the built-in keypad and watch the USD and EUR equivalents update live.
+
+**Live:** https://franvillanu.github.io/ars-converter/
 
 ## Features
-- Big ARS input with live thousand-separator formatting (es-AR).
-- Two columns below: **USD** and **EUR** equivalents.
-- Live rates from [dolarapi.com](https://dolarapi.com) (Blue / Oficial for USD, Euro for EUR).
-- Blue / Oficial toggle for the dollar rate.
-- Last good rate cached in `localStorage` — still usable offline.
-- Auto-refresh when the app regains focus.
+- **Bespoke numeric keypad** — no OS keyboard; big one-handed targets, press
+  animation, haptic feedback, and `+1K / +10K / +100K` quick-add chips.
+- Two result columns: **USD** and **EUR**, with animated count-up values.
+- Four markets in a sliding segmented control: **Blue · Oficial · MEP · Tarjeta**.
+- Buy/sell spread and last-updated time per rate. EUR tracks the selected market
+  (scaled off the official euro; estimates flagged with `*`).
+- Live rates from [dolarapi.com](https://dolarapi.com); last value cached in
+  `localStorage` so it still works offline. Auto-refreshes on focus and every 90s.
+- Adaptive **light / dark** theme, `prefers-reduced-motion` support, safe-area aware.
 
 ## Design
-Argentina "world-cup shirt" theme: celeste-and-white vertical stripes, **3 gold
-stars** (the three World Cups) and a stylized **Malvinas** islands silhouette.
-
-## Live
-Once GitHub Pages is enabled (Settings → Pages → Deploy from branch → `main` / root):
-**https://franvillanu.github.io/ars-converter/**
+Argentina identity, restrained: **3 championship stars**, a faint **Sol de Mayo**
+halo, and a solid **Malvinas** islands silhouette — over an airy celeste canvas
+with a floating glass input card.
 
 ## Run locally
-It's a single static file — no build step. Open `index.html`, or serve the folder:
+Single static file, no build step:
 
 ```bash
 python3 -m http.server 8080
@@ -28,8 +30,12 @@ python3 -m http.server 8080
 ```
 
 ## Rates
-- USD Blue:    `https://dolarapi.com/v1/dolares/blue`
-- USD Oficial: `https://dolarapi.com/v1/dolares/oficial`
-- EUR:         `https://dolarapi.com/v1/cotizaciones/eur`
+| Market  | Endpoint |
+|---------|----------|
+| Blue    | `https://dolarapi.com/v1/dolares/blue` |
+| Oficial | `https://dolarapi.com/v1/dolares/oficial` |
+| MEP     | `https://dolarapi.com/v1/dolares/bolsa` |
+| Tarjeta | `https://dolarapi.com/v1/dolares/tarjeta` |
+| Euro    | `https://dolarapi.com/v1/cotizaciones/eur` |
 
 Conversion uses each source's `venta` (sell) value: `equiv = ARS / rate`.

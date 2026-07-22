@@ -2,189 +2,333 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#75AADB">
-<title>Peso ARS → USD / EUR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#8ec3ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#081726" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pesos">
+<meta name="description" content="Conversor de pesos argentinos a USD y EUR con cotización en vivo.">
+<title>Pesos · ARS → USD / EUR</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2374ACDF'/%3E%3Cpath d='M50 20l6.5 13.2 14.6 2.1-10.5 10.3 2.5 14.5L50 63.3 36.4 60.4l2.5-14.5-10.5-10.3 14.6-2.1z' fill='%23F6B40E'/%3E%3C/svg%3E">
 <style>
   :root{
-    --celeste:#75AADB;
-    --celeste-deep:#4a90c4;
-    --gold:#f6b40e;
-    --ink:#0d2b45;
-    --white:#ffffff;
-    --usd:#2e8b57;
-    --eur:#3b5bdb;
-    --card:rgba(255,255,255,0.92);
+    --celeste:#74ACDF;
+    --celeste-soft:#9ec9ee;
+    --celeste-deep:#2f7ec0;
+    --gold:#F6B40E;
+    --gold-soft:#ffd257;
+
+    --bg:#e8f1fb;
+    --bg-2:#dceaf6;
+    --surface:#ffffff;
+    --surface-2:#f3f8fd;
+    --surface-key:#ffffff;
+    --stroke:rgba(16,52,84,0.08);
+    --stroke-strong:rgba(16,52,84,0.14);
+
+    --ink:#0c2338;
+    --ink-2:#375068;
+    --ink-3:#6f889c;
+
+    --usd:#12805c;
+    --usd-tint:rgba(18,128,92,0.10);
+    --eur:#3f57c9;
+    --eur-tint:rgba(63,87,201,0.10);
+
+    --shadow-sm:0 1px 2px rgba(11,30,56,.06), 0 2px 6px rgba(11,30,56,.06);
+    --shadow-md:0 6px 18px rgba(11,30,56,.10), 0 2px 6px rgba(11,30,56,.06);
+    --shadow-lg:0 18px 42px rgba(11,30,56,.18), 0 6px 14px rgba(11,30,56,.10);
+
+    --r-lg:24px;
+    --r-md:18px;
+    --r-sm:14px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+    --pop:cubic-bezier(.34,1.56,.64,1);
   }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#081726;
+      --bg-2:#040e19;
+      --surface:#0f2739;
+      --surface-2:#122e43;
+      --surface-key:#16344b;
+      --stroke:rgba(255,255,255,0.07);
+      --stroke-strong:rgba(255,255,255,0.13);
+
+      --ink:#eaf3fc;
+      --ink-2:#a9c1d6;
+      --ink-3:#7a95ac;
+
+      --usd:#3fd39a;
+      --usd-tint:rgba(63,211,154,0.12);
+      --eur:#8ea0ff;
+      --eur-tint:rgba(142,160,255,0.14);
+
+      --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+      --shadow-md:0 8px 22px rgba(0,0,0,.45);
+      --shadow-lg:0 22px 50px rgba(0,0,0,.55);
+    }
+  }
+
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;}
+  html{-webkit-text-size-adjust:100%;}
   body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--ink);
+    background:var(--bg);
     min-height:100dvh;
-    /* Argentina jersey: celeste + white vertical stripes */
-    background:
-      repeating-linear-gradient(
-        90deg,
-        var(--celeste) 0,
-        var(--celeste) 32px,
-        #82b4e0 32px,
-        #82b4e0 64px
-      );
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    position:relative;
+    min-height:100dvh;
+    max-width:460px;
+    margin:0 auto;
     display:flex;
     flex-direction:column;
-    align-items:center;
-    padding:env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px);
+    padding:calc(env(safe-area-inset-top) + 8px) 15px calc(env(safe-area-inset-bottom) + 12px);
+    isolation:isolate;
   }
 
-  .shell{
-    width:100%;
-    max-width:480px;
-    margin:auto;
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-    padding-top:22px;
+  /* ---------- ambient background ---------- */
+  .aura{position:fixed;inset:0;z-index:-2;background:
+      radial-gradient(120% 70% at 50% -8%, var(--celeste-soft) 0%, transparent 58%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);}
+  @media (prefers-color-scheme: dark){
+    .aura{background:
+      radial-gradient(120% 65% at 50% -10%, rgba(47,126,192,.42) 0%, transparent 60%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);}
   }
+  .sun{position:fixed;top:-186px;left:50%;transform:translateX(-50%);width:300px;height:300px;z-index:-1;opacity:.15;pointer-events:none;}
+  @media (prefers-color-scheme: dark){ .sun{opacity:.13;} }
 
-  /* ---- Header / crest ---- */
-  header{text-align:center;color:var(--white);}
-  .stars{display:flex;justify-content:center;gap:10px;margin-bottom:6px;}
-  .stars svg{width:26px;height:26px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));}
-  h1{font-size:1.5rem;font-weight:800;letter-spacing:.5px;text-shadow:0 1px 2px rgba(0,0,0,.28);}
-  .subtitle{font-size:.8rem;opacity:.95;margin-top:2px;font-weight:600;text-shadow:0 1px 1px rgba(0,0,0,.25);}
+  /* ---------- header ---------- */
+  header{text-align:center;padding:2px 0 8px;position:relative;}
+  .stars{display:inline-flex;gap:8px;margin-bottom:6px;}
+  .stars svg{width:18px;height:18px;filter:drop-shadow(0 1px 1px rgba(120,80,0,.28));animation:starIn .6s var(--pop) both;}
+  .stars svg:nth-child(2){animation-delay:.07s;}
+  .stars svg:nth-child(3){animation-delay:.14s;}
+  @keyframes starIn{from{opacity:0;transform:translateY(6px) scale(.5) rotate(-25deg);}to{opacity:1;transform:none;}}
 
-  .malvinas{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:8px;color:var(--white);}
-  .malvinas svg{width:64px;height:auto;opacity:.95;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));}
-  .malvinas span{font-size:.66rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.9;}
+  .wordmark{font-size:1.55rem;font-weight:800;letter-spacing:-.02em;line-height:1;}
+  .wordmark .accent{color:var(--celeste-deep);}
+  @media (prefers-color-scheme: dark){ .wordmark .accent{color:var(--celeste-soft);} }
+  .tagline{margin-top:5px;font-size:.7rem;font-weight:600;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase;}
 
-  /* ---- Input card ---- */
-  .input-card{
-    background:var(--card);
-    border-radius:22px;
-    padding:20px 18px 18px;
-    box-shadow:0 10px 30px rgba(13,43,69,.25);
-    backdrop-filter:blur(4px);
-  }
-  .input-label{
-    display:flex;align-items:center;gap:8px;
-    font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
-    color:var(--celeste-deep);margin-bottom:6px;
-  }
-  .flag-dot{width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(246,180,14,.25);}
-  .amount-wrap{display:flex;align-items:baseline;gap:8px;}
-  .cur{font-size:1.8rem;font-weight:800;color:var(--ink);opacity:.55;}
-  #amount{
-    flex:1;min-width:0;
-    border:none;background:transparent;outline:none;
-    font-size:2.9rem;font-weight:800;color:var(--ink);
-    width:100%;
-    font-variant-numeric:tabular-nums;
-  }
-  #amount::placeholder{color:#9db4c7;}
+  .crest{display:inline-flex;align-items:center;gap:7px;margin-top:8px;opacity:.8;}
+  .crest svg{width:44px;height:auto;color:var(--celeste-deep);}
+  @media (prefers-color-scheme: dark){ .crest svg{color:var(--celeste-soft);} }
+  .crest .lbl{font-size:.55rem;font-weight:700;letter-spacing:.32em;color:var(--ink-3);}
 
-  /* ---- Result columns ---- */
-  .results{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  .col{
-    background:var(--card);
-    border-radius:20px;
-    padding:16px 14px;
-    text-align:center;
-    box-shadow:0 8px 22px rgba(13,43,69,.18);
-    border-top:5px solid var(--celeste);
+  /* ---------- amount card ---------- */
+  .amount-card{
+    background:var(--surface);
+    border:1px solid var(--stroke);
+    border-radius:var(--r-lg);
+    box-shadow:var(--shadow-lg);
+    padding:12px 18px 13px;
+    animation:rise .5s var(--ease) both;
   }
-  .col.usd{border-top-color:var(--usd);}
-  .col.eur{border-top-color:var(--eur);}
-  .col .code{font-size:.9rem;font-weight:800;letter-spacing:1px;}
-  .col.usd .code{color:var(--usd);}
-  .col.eur .code{color:var(--eur);}
-  .col .flag{font-size:1.4rem;line-height:1;margin-bottom:4px;}
-  .col .value{font-size:1.65rem;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums;word-break:break-word;}
-  .col .rate{font-size:.66rem;color:#5b7488;margin-top:6px;font-weight:600;}
+  @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  .amount-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .amount-head .label{display:flex;align-items:center;gap:8px;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);}
+  .sol-dot{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%, var(--gold-soft), var(--gold));box-shadow:0 0 0 3px rgba(246,180,14,.18);}
+  .amount-head .badge{font-size:.64rem;font-weight:700;color:var(--celeste-deep);background:var(--surface-2);border:1px solid var(--stroke);padding:3px 9px;border-radius:999px;}
+  @media (prefers-color-scheme: dark){ .amount-head .badge{color:var(--celeste-soft);} }
 
-  /* ---- Footer / status ---- */
-  .status{
-    display:flex;align-items:center;justify-content:center;gap:10px;
-    color:var(--white);font-size:.72rem;font-weight:600;text-shadow:0 1px 1px rgba(0,0,0,.25);
-    flex-wrap:wrap;text-align:center;
+  .amount-row{display:flex;align-items:baseline;gap:6px;min-height:52px;}
+  .amount-row .sym{font-size:1.7rem;font-weight:700;color:var(--ink-3);flex:none;}
+  #amountDisplay{
+    font-size:3rem;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--ink);
+    font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;flex:1;min-width:0;
+    transition:font-size .12s ease;
   }
-  .status .dot{width:8px;height:8px;border-radius:50%;background:#8fd19e;}
-  .status.err .dot{background:#ff6b6b;}
+  #amountDisplay.empty{color:var(--ink-3);opacity:.45;}
+  .caret{display:inline-block;width:2.5px;height:.9em;vertical-align:-2px;margin-left:2px;background:var(--celeste-deep);border-radius:2px;animation:blink 1.1s steps(1) infinite;transform:translateY(.06em);}
+  @media (prefers-color-scheme: dark){ .caret{background:var(--celeste-soft);} }
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ---------- segmented control ---------- */
+  .seg{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:10px 3px 0;background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;padding:4px;box-shadow:var(--shadow-sm);}
+  .seg .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(25% - 3px);background:var(--surface);border-radius:999px;box-shadow:var(--shadow-sm);transition:transform .32s var(--ease);z-index:0;}
+  .seg button{position:relative;z-index:1;border:none;background:none;padding:7px 0;font-size:.79rem;font-weight:700;color:var(--ink-3);cursor:pointer;border-radius:999px;transition:color .2s ease;}
+  .seg button.active{color:var(--celeste-deep);}
+  @media (prefers-color-scheme: dark){ .seg button.active{color:var(--ink);} }
+
+  /* ---------- results ---------- */
+  .results{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:11px;}
+  .rc{position:relative;background:var(--surface);border:1px solid var(--stroke);border-radius:var(--r-md);box-shadow:var(--shadow-md);padding:12px 13px 11px;overflow:hidden;animation:rise .55s var(--ease) both;}
+  .rc.usd{animation-delay:.05s;}
+  .rc.eur{animation-delay:.1s;}
+  .rc::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--accentc);opacity:.9;}
+  .rc.usd{--accentc:var(--usd);}
+  .rc.eur{--accentc:var(--eur);}
+  .rc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:800;letter-spacing:.02em;padding:4px 9px 4px 7px;border-radius:999px;}
+  .rc.usd .chip{color:var(--usd);background:var(--usd-tint);}
+  .rc.eur .chip{color:var(--eur);background:var(--eur-tint);}
+  .chip .fx{font-size:1rem;line-height:1;}
+  .rc .full{font-size:.6rem;font-weight:600;color:var(--ink-3);letter-spacing:.02em;}
+  .rc .value{font-size:1.62rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:clip;margin-top:2px;}
+  .rc .value .cents{color:var(--ink-2);font-weight:700;}
+  .rc .sub{margin-top:7px;padding-top:7px;border-top:1px dashed var(--stroke-strong);display:flex;flex-direction:column;gap:2px;}
+  .rc .rate{font-size:.66rem;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;}
+  .rc .spread{font-size:.58rem;color:var(--ink-3);font-variant-numeric:tabular-nums;}
+
+  /* ---------- status ---------- */
+  .status{display:flex;align-items:center;justify-content:center;gap:7px;margin:8px 0 2px;font-size:.66rem;font-weight:600;color:var(--ink-3);}
+  .status .dot{width:7px;height:7px;border-radius:50%;background:#33c481;box-shadow:0 0 0 3px rgba(51,196,129,.16);}
+  .status.err .dot{background:#ef5b5b;box-shadow:0 0 0 3px rgba(239,91,91,.16);}
   .status.loading .dot{background:var(--gold);animation:pulse 1s infinite;}
-  @keyframes pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
-  .refresh{
-    background:rgba(255,255,255,.9);color:var(--celeste-deep);
-    border:none;border-radius:999px;padding:6px 14px;
-    font-size:.72rem;font-weight:800;cursor:pointer;
-    box-shadow:0 3px 8px rgba(13,43,69,.2);
-  }
-  .refresh:active{transform:scale(.96);}
+  @keyframes pulse{0%,100%{opacity:.35;}50%{opacity:1;}}
 
-  .rate-toggle{display:flex;justify-content:center;gap:6px;margin-top:2px;}
-  .rate-toggle button{
-    background:rgba(255,255,255,.85);color:var(--celeste-deep);
-    border:2px solid transparent;border-radius:999px;
-    padding:5px 12px;font-size:.7rem;font-weight:800;cursor:pointer;
+  /* ---------- keypad ---------- */
+  .keypad-wrap{margin-top:auto;padding-top:8px;}
+  .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:7px;}
+  .quick button{border:1px solid var(--stroke);background:var(--surface-2);color:var(--ink-2);font-size:.8rem;font-weight:700;padding:8px 0;border-radius:var(--r-sm);cursor:pointer;transition:transform .12s var(--pop),background .2s;font-variant-numeric:tabular-nums;}
+  .quick button.clear{color:var(--celeste-deep);}
+  @media (prefers-color-scheme: dark){ .quick button.clear{color:var(--celeste-soft);} }
+  .quick button:active{transform:scale(.93);background:var(--surface);}
+
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+  .key{position:relative;overflow:hidden;border:1px solid var(--stroke);background:var(--surface-key);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);
+    font-size:1.45rem;font-weight:700;color:var(--ink);cursor:pointer;
+    min-height:clamp(44px,6.3vh,58px);display:flex;align-items:center;justify-content:center;
+    transition:transform .1s var(--pop);font-variant-numeric:tabular-nums;touch-action:manipulation;user-select:none;}
+  .key:active{transform:scale(.95);}
+  .key.util{color:var(--ink-2);font-size:1.2rem;}
+  .key svg{width:24px;height:24px;}
+  .key .ripple{position:absolute;border-radius:50%;background:var(--celeste);opacity:.28;transform:translate(-50%,-50%) scale(0);pointer-events:none;animation:ripple .45s var(--ease) forwards;}
+  @keyframes ripple{to{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+    .caret{animation:none;}
   }
-  .rate-toggle button.active{background:var(--white);border-color:var(--gold);color:var(--ink);}
+  @media (max-height:680px){
+    .crest{display:none;}
+  }
 </style>
 </head>
 <body>
-  <div class="shell">
-    <header>
-      <div class="stars" aria-label="3 estrellas mundiales">
-        <!-- 3 gold stars = 3 World Cups -->
-        <svg viewBox="0 0 24 24" fill="#f6b40e"><path d="M12 2l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.8 6.1 20.8l1.2-6.6L2.4 9l6.7-.9z"/></svg>
-        <svg viewBox="0 0 24 24" fill="#f6b40e"><path d="M12 2l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.8 6.1 20.8l1.2-6.6L2.4 9l6.7-.9z"/></svg>
-        <svg viewBox="0 0 24 24" fill="#f6b40e"><path d="M12 2l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.8 6.1 20.8l1.2-6.6L2.4 9l6.7-.9z"/></svg>
-      </div>
-      <h1>Conversor de Pesos</h1>
-      <div class="subtitle">ARS → USD · EUR · cotización en vivo</div>
+  <div class="aura"></div>
+  <svg class="sun" viewBox="0 0 200 200" aria-hidden="true">
+    <g fill="none" stroke="#F6B40E" stroke-width="2">
+      <circle cx="100" cy="100" r="30"/>
+      <g stroke-linecap="round" opacity=".7">
+        <line x1="100" y1="46" x2="100" y2="16"/><line x1="138" y1="62" x2="159" y2="41"/>
+        <line x1="154" y1="100" x2="184" y2="100"/><line x1="138" y1="138" x2="159" y2="159"/>
+        <line x1="100" y1="154" x2="100" y2="184"/><line x1="62" y1="138" x2="41" y2="159"/>
+        <line x1="46" y1="100" x2="16" y2="100"/><line x1="62" y1="62" x2="41" y2="41"/>
+        <line x1="119" y1="49" x2="129" y2="21"/><line x1="151" y1="81" x2="179" y2="71"/>
+        <line x1="151" y1="119" x2="179" y2="129"/><line x1="119" y1="151" x2="129" y2="179"/>
+        <line x1="81" y1="151" x2="71" y2="179"/><line x1="49" y1="119" x2="21" y2="129"/>
+        <line x1="49" y1="81" x2="21" y2="71"/><line x1="81" y1="49" x2="71" y2="21"/>
+      </g>
+    </g>
+  </svg>
 
-      <div class="malvinas" title="Las Malvinas son argentinas">
-        <!-- Stylized Malvinas islands silhouette -->
-        <svg viewBox="0 0 120 60" fill="currentColor" aria-hidden="true">
-          <!-- Gran Malvina (west) -->
-          <path d="M8 30 C6 22 12 16 20 15 C28 14 33 20 36 22 C40 25 44 24 46 28 C48 33 44 38 40 41 C34 45 30 44 24 43 C15 42 10 38 8 30 Z"/>
-          <!-- Isla Soledad (east) -->
-          <path d="M58 22 C62 15 72 13 82 16 C92 19 100 17 106 22 C112 27 110 33 104 35 C100 37 98 33 94 34 C90 35 90 40 84 42 C77 44 72 40 68 42 C63 44 58 41 57 36 C56 31 55 27 58 22 Z"/>
+  <div class="app">
+    <header>
+      <div class="stars" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="#F6B40E"><path d="M12 2l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.8 6.1 20.8l1.2-6.6L2.4 9l6.7-.9z"/></svg>
+        <svg viewBox="0 0 24 24" fill="#F6B40E"><path d="M12 2l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.8 6.1 20.8l1.2-6.6L2.4 9l6.7-.9z"/></svg>
+        <svg viewBox="0 0 24 24" fill="#F6B40E"><path d="M12 2l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.8 6.1 20.8l1.2-6.6L2.4 9l6.7-.9z"/></svg>
+      </div>
+      <div class="wordmark">Pesos<span class="accent">.</span></div>
+      <div class="tagline">Cotización en vivo · ARS → USD · EUR</div>
+
+      <div class="crest" title="Las Malvinas son argentinas">
+        <svg viewBox="0 0 200 104" fill="currentColor" aria-hidden="true">
+          <!-- Gran Malvina (West) — chunky island with an indented east coast -->
+          <path d="M28 50 C24 40 32 31 44 31 C52 31 57 35 63 35 C68 35 70 30 75 33
+                   C79 36 76 41 79 46 C82 53 79 60 70 63 C63 65 58 61 51 63
+                   C44 65 40 66 35 62 C30 58 30 56 28 50 Z"/>
+          <!-- Isla Soledad (East) — larger, Lafonia lobe hanging south via a narrow isthmus -->
+          <path d="M108 44 C110 34 123 29 137 30 C149 31 159 28 167 35 C174 41 171 49 163 53
+                   C156 56 150 53 145 56 C148 59 149 62 146 65 C143 67 141 67 139 69
+                   C144 76 142 88 133 94 C126 98 118 96 115 89 C112 83 116 77 120 74
+                   C123 72 127 73 129 70 C131 67 129 65 126 64 C118 62 110 62 106 55
+                   C103 50 106 47 108 44 Z"/>
         </svg>
-        <span>Malvinas</span>
+        <span class="lbl">MALVINAS</span>
       </div>
     </header>
 
-    <section class="input-card">
-      <label class="input-label" for="amount"><span class="flag-dot"></span> Pesos argentinos (ARS)</label>
-      <div class="amount-wrap">
-        <span class="cur">$</span>
-        <input id="amount" type="text" inputmode="decimal" placeholder="0" autocomplete="off" enterkeyhint="done" aria-label="Monto en pesos argentinos">
+    <section class="amount-card">
+      <div class="amount-head">
+        <span class="label"><span class="sol-dot"></span> Pesos argentinos</span>
+        <span class="badge">ARS</span>
+      </div>
+      <div class="amount-row">
+        <span class="sym">$</span>
+        <div id="amountDisplay" class="empty" role="textbox" aria-label="Monto en pesos" aria-readonly="true">0<span class="caret"></span></div>
       </div>
     </section>
 
-    <div class="rate-toggle" id="rateToggle" aria-label="Tipo de cotización">
+    <nav class="seg" id="seg" aria-label="Tipo de cambio">
+      <span class="pill" id="segPill"></span>
       <button data-rate="blue" class="active">Blue</button>
       <button data-rate="oficial">Oficial</button>
-    </div>
+      <button data-rate="mep">MEP</button>
+      <button data-rate="tarjeta">Tarjeta</button>
+    </nav>
 
     <section class="results">
-      <div class="col usd">
-        <div class="flag">🇺🇸</div>
-        <div class="code">USD</div>
+      <div class="rc usd">
+        <div class="rc-top">
+          <span class="chip"><span class="fx">🇺🇸</span> USD</span>
+        </div>
+        <div class="full">Dólar estadounidense</div>
         <div class="value" id="usdVal">—</div>
-        <div class="rate" id="usdRate">cargando…</div>
+        <div class="sub">
+          <span class="rate" id="usdRate">cargando…</span>
+          <span class="spread" id="usdSpread"></span>
+        </div>
       </div>
-      <div class="col eur">
-        <div class="flag">🇪🇺</div>
-        <div class="code">EUR</div>
+      <div class="rc eur">
+        <div class="rc-top">
+          <span class="chip"><span class="fx">🇪🇺</span> EUR</span>
+        </div>
+        <div class="full">Euro</div>
         <div class="value" id="eurVal">—</div>
-        <div class="rate" id="eurRate">cargando…</div>
+        <div class="sub">
+          <span class="rate" id="eurRate">cargando…</span>
+          <span class="spread" id="eurSpread"></span>
+        </div>
       </div>
     </section>
 
     <div class="status loading" id="status">
       <span class="dot"></span>
       <span id="statusText">Obteniendo cotización…</span>
-      <button class="refresh" id="refresh">Actualizar</button>
+    </div>
+
+    <div class="keypad-wrap">
+      <div class="quick" id="quick">
+        <button data-add="1000">+1K</button>
+        <button data-add="10000">+10K</button>
+        <button data-add="100000">+100K</button>
+        <button class="clear" data-clear="1">Borrar</button>
+      </div>
+      <div class="keypad" id="keypad">
+        <button class="key" data-k="1">1</button>
+        <button class="key" data-k="2">2</button>
+        <button class="key" data-k="3">3</button>
+        <button class="key" data-k="4">4</button>
+        <button class="key" data-k="5">5</button>
+        <button class="key" data-k="6">6</button>
+        <button class="key" data-k="7">7</button>
+        <button class="key" data-k="8">8</button>
+        <button class="key" data-k="9">9</button>
+        <button class="key util" data-k=",">,</button>
+        <button class="key" data-k="0">0</button>
+        <button class="key util" data-k="back" aria-label="Borrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H8L2 12l6 7h13a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1Z"/><path d="M15 9l-4 6M11 9l4 6"/></svg>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -195,175 +339,229 @@
   var API = {
     blue:    "https://dolarapi.com/v1/dolares/blue",
     oficial: "https://dolarapi.com/v1/dolares/oficial",
-    eur:     "https://dolarapi.com/v1/cotizaciones/eur"          // euro "blue"/informal
+    mep:     "https://dolarapi.com/v1/dolares/bolsa",
+    tarjeta: "https://dolarapi.com/v1/dolares/tarjeta",
+    eur:     "https://dolarapi.com/v1/cotizaciones/eur"
   };
-  var LS_KEY = "ars_conv_rates_v1";
+  var LS_KEY = "pesos_rates_v2";
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var state = {
-    rateType: "blue",          // blue | oficial
-    rates: { blue:null, oficial:null, eur:null, ts:null }
+    raw: "",
+    rateType: "blue",
+    rates: {},
+    shownUSD: 0, shownEUR: 0
   };
 
-  var $amount   = document.getElementById("amount");
-  var $usdVal   = document.getElementById("usdVal");
-  var $eurVal   = document.getElementById("eurVal");
-  var $usdRate  = document.getElementById("usdRate");
-  var $eurRate  = document.getElementById("eurRate");
-  var $status   = document.getElementById("status");
-  var $statusTx = document.getElementById("statusText");
-  var $refresh  = document.getElementById("refresh");
-  var $toggle   = document.getElementById("rateToggle");
+  var el = function(id){ return document.getElementById(id); };
+  var $disp = el("amountDisplay");
+  var $usdVal = el("usdVal"), $eurVal = el("eurVal");
+  var $usdRate = el("usdRate"), $eurRate = el("eurRate");
+  var $usdSpread = el("usdSpread"), $eurSpread = el("eurSpread");
+  var $status = el("status"), $statusText = el("statusText");
+  var $seg = el("seg"), $segPill = el("segPill");
 
-  var nfARS = new Intl.NumberFormat("es-AR", {minimumFractionDigits:0, maximumFractionDigits:2});
-  var nfMoney = new Intl.NumberFormat("es-AR", {minimumFractionDigits:2, maximumFractionDigits:2});
-  var nfRate = new Intl.NumberFormat("es-AR", {minimumFractionDigits:2, maximumFractionDigits:2});
+  var nfInt = new Intl.NumberFormat("es-AR");
+  var nfMoney = new Intl.NumberFormat("es-AR",{minimumFractionDigits:2, maximumFractionDigits:2});
+  var nfRate = new Intl.NumberFormat("es-AR",{minimumFractionDigits:2, maximumFractionDigits:2});
 
-  // ---------- parsing / formatting of the ARS input ----------
-  // es-AR: "." thousands, "," decimals. Keep quick typing painless.
-  function parseAmount(str){
-    if(!str) return 0;
-    var cleaned = str.replace(/\./g,"").replace(/,/g,".").replace(/[^0-9.]/g,"");
-    var parts = cleaned.split(".");
-    if(parts.length > 2){ cleaned = parts[0] + "." + parts.slice(1).join(""); }
-    var n = parseFloat(cleaned);
+  // ---------- amount parsing / display ----------
+  function amountValue(){
+    if(!state.raw) return 0;
+    var n = parseFloat(state.raw.replace(/\./g,"").replace(",","."));
     return isFinite(n) ? n : 0;
   }
-
-  function formatLiveInput(raw){
-    // preserve a trailing decimal comma while typing
-    var hasComma = raw.indexOf(",") !== -1;
-    var digits = raw.replace(/\./g,"");
-    var intPart, decPart="";
-    if(hasComma){
-      var idx = digits.indexOf(",");
-      intPart = digits.slice(0, idx).replace(/[^0-9]/g,"");
-      decPart = digits.slice(idx+1).replace(/[^0-9]/g,"").slice(0,2);
-    } else {
-      intPart = digits.replace(/[^0-9]/g,"");
-    }
-    if(intPart === "") intPart = "0";
-    var intNum = parseInt(intPart,10) || 0;
-    var out = nfARS.format(intNum);
-    if(hasComma){ out += "," + decPart; }
-    return out;
+  function formatRaw(raw){
+    if(raw === "") return "0";
+    var parts = raw.split(",");
+    var intN = parseInt(parts[0],10);
+    var intStr = isNaN(intN) ? "0" : nfInt.format(intN);
+    if(parts.length > 1) return intStr + "," + parts[1];
+    return intStr;
   }
+  function fitFont(){
+    var len = $disp.textContent.replace(/[^0-9]/g,"").length;
+    var size = 3;
+    if(len > 14) size = 1.6; else if(len > 12) size = 1.9;
+    else if(len > 10) size = 2.2; else if(len > 8) size = 2.6;
+    $disp.style.fontSize = size + "rem";
+  }
+  function renderAmount(){
+    var isEmpty = state.raw === "";
+    $disp.classList.toggle("empty", isEmpty);
+    $disp.innerHTML = formatRaw(state.raw) + '<span class="caret"></span>';
+    fitFont();
+  }
+
+  // ---------- keypad input ----------
+  function press(k){
+    if(k === "back"){ state.raw = state.raw.slice(0,-1); }
+    else if(k === ","){
+      if(state.raw.indexOf(",") === -1) state.raw = (state.raw === "" ? "0" : state.raw) + ",";
+    } else {
+      var parts = state.raw.split(",");
+      if(parts.length > 1 && parts[1].length >= 2) return;
+      if(state.raw === "0") state.raw = k;
+      else if(state.raw.replace(/[^0-9]/g,"").length >= 15) return;
+      else state.raw += k;
+    }
+    renderAmount();
+    renderResults(true);
+  }
+  function quickAdd(n){
+    var v = Math.floor(amountValue()) + n;
+    state.raw = String(v);
+    renderAmount(); renderResults(true);
+  }
+  function clearAll(){ state.raw = ""; renderAmount(); renderResults(true); }
+
+  function haptic(ms){ if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
+  function ripple(btn, ev){
+    if(reduceMotion) return;
+    var r = btn.getBoundingClientRect();
+    var d = Math.max(r.width, r.height) * 1.4;
+    var s = document.createElement("span");
+    s.className = "ripple";
+    s.style.width = s.style.height = d + "px";
+    var cx = (ev && ev.clientX ? ev.clientX : r.left + r.width/2) - r.left;
+    var cy = (ev && ev.clientY ? ev.clientY : r.top + r.height/2) - r.top;
+    s.style.left = cx + "px"; s.style.top = cy + "px";
+    btn.appendChild(s);
+    setTimeout(function(){ s.remove(); }, 460);
+  }
+
+  el("keypad").addEventListener("pointerdown", function(e){
+    var btn = e.target.closest(".key"); if(!btn) return;
+    ripple(btn, e); haptic(8); press(btn.getAttribute("data-k"));
+  });
+  el("quick").addEventListener("pointerdown", function(e){
+    var btn = e.target.closest("button"); if(!btn) return;
+    haptic(8);
+    if(btn.hasAttribute("data-clear")) clearAll();
+    else quickAdd(parseInt(btn.getAttribute("data-add"),10));
+  });
+  window.addEventListener("keydown", function(e){
+    if(e.key >= "0" && e.key <= "9") press(e.key);
+    else if(e.key === "," || e.key === ".") press(",");
+    else if(e.key === "Backspace") press("back");
+    else if(e.key === "Escape") clearAll();
+  });
 
   // ---------- rates ----------
-  function currentUsdRate(){
-    var r = state.rates[state.rateType];
-    return r && r.venta ? r.venta : null;
+  function usdRateFor(type){
+    var r = state.rates[type];
+    return (r && r.venta) ? r : null;
   }
-  function currentEurRate(){
-    var r = state.rates.eur;
-    return r && r.venta ? r.venta : null;
+  function eurRateFor(type){
+    var eur = state.rates.eur;
+    if(!eur || !eur.venta) return null;
+    var of = state.rates.oficial, sel = state.rates[type];
+    var factor = 1;
+    if(of && of.venta && sel && sel.venta) factor = sel.venta / of.venta;
+    return {
+      compra: (eur.compra||eur.venta) * factor,
+      venta: eur.venta * factor,
+      scaled: (type !== "oficial")
+    };
   }
 
-  function render(){
-    var amount = parseAmount($amount.value);
-    var uRate = currentUsdRate();
-    var eRate = currentEurRate();
-
-    if(uRate){
-      $usdVal.textContent = "US$ " + nfMoney.format(amount / uRate);
-      $usdRate.textContent = "1 USD = $" + nfRate.format(uRate);
+  function splitCents(str){
+    var i = str.lastIndexOf(",");
+    if(i === -1) return str;
+    return str.slice(0,i) + '<span class="cents">' + str.slice(i) + '</span>';
+  }
+  function animateVal($node, from, to, prefix){
+    if(reduceMotion || from === to){
+      $node.innerHTML = prefix + " " + splitCents(nfMoney.format(to));
+      return;
     }
-    if(eRate){
-      $eurVal.textContent = "€ " + nfMoney.format(amount / eRate);
-      $eurRate.textContent = "1 EUR = $" + nfRate.format(eRate);
+    var start = performance.now(), dur = 380;
+    function step(now){
+      var t = Math.min(1,(now-start)/dur);
+      var e = 1-Math.pow(1-t,3);
+      var v = from + (to-from)*e;
+      $node.innerHTML = prefix + " " + splitCents(nfMoney.format(v));
+      if(t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function renderResults(animate){
+    var amount = amountValue();
+    var u = usdRateFor(state.rateType);
+    var e = eurRateFor(state.rateType);
+
+    if(u){
+      var uv = amount / u.venta;
+      animateVal($usdVal, animate ? state.shownUSD : uv, uv, "US$");
+      state.shownUSD = uv;
+      $usdRate.textContent = "1 USD = $" + nfRate.format(u.venta);
+      $usdSpread.textContent = "compra $" + nfRate.format(u.compra||u.venta) + " · venta $" + nfRate.format(u.venta);
+    }
+    if(e){
+      var ev = amount / e.venta;
+      animateVal($eurVal, animate ? state.shownEUR : ev, ev, "€");
+      state.shownEUR = ev;
+      $eurRate.textContent = "1 EUR = $" + nfRate.format(e.venta) + (e.scaled ? " *" : "");
+      $eurSpread.textContent = e.scaled ? "estimado s/ mercado " + labelFor(state.rateType)
+                                        : "compra $" + nfRate.format(e.compra) + " · venta $" + nfRate.format(e.venta);
     }
   }
 
-  function setStatus(kind, text){
-    $status.className = "status " + kind;
-    $statusTx.textContent = text;
-  }
+  function labelFor(t){ return ({blue:"blue",oficial:"oficial",mep:"MEP",tarjeta:"tarjeta"})[t] || t; }
 
-  function saveCache(){
-    try{ localStorage.setItem(LS_KEY, JSON.stringify(state.rates)); }catch(e){}
-  }
+  function setStatus(kind, text){ $status.className = "status " + kind; $statusText.textContent = text; }
+  function timeLabel(ts){ try{ return new Date(ts).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } }
+
+  function saveCache(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state.rates)); }catch(e){} }
   function loadCache(){
-    try{
-      var c = JSON.parse(localStorage.getItem(LS_KEY));
-      if(c && (c.blue || c.oficial || c.eur)){ state.rates = c; return true; }
-    }catch(e){}
+    try{ var c = JSON.parse(localStorage.getItem(LS_KEY));
+      if(c && (c.blue||c.oficial||c.mep||c.tarjeta||c.eur)){ state.rates = c; return true; } }catch(e){}
     return false;
   }
 
   function fetchJSON(url){
-    return fetch(url, {cache:"no-store"}).then(function(r){
-      if(!r.ok) throw new Error("HTTP "+r.status);
-      return r.json();
-    });
+    return fetch(url,{cache:"no-store"}).then(function(r){ if(!r.ok) throw 0; return r.json(); });
   }
-
   function refresh(){
     setStatus("loading","Obteniendo cotización…");
-    Promise.allSettled([
-      fetchJSON(API.blue),
-      fetchJSON(API.oficial),
-      fetchJSON(API.eur)
-    ]).then(function(res){
+    var keys = ["blue","oficial","mep","tarjeta","eur"];
+    Promise.allSettled(keys.map(function(k){ return fetchJSON(API[k]); })).then(function(res){
       var got = false;
-      if(res[0].status==="fulfilled"){ state.rates.blue = res[0].value; got = true; }
-      if(res[1].status==="fulfilled"){ state.rates.oficial = res[1].value; got = true; }
-      if(res[2].status==="fulfilled"){ state.rates.eur = res[2].value; got = true; }
-
+      res.forEach(function(r,i){ if(r.status === "fulfilled"){ state.rates[keys[i]] = r.value; got = true; } });
       if(got){
-        state.rates.ts = Date.now();
-        saveCache();
-        render();
+        state.rates.ts = Date.now(); saveCache();
+        renderResults(true);
         setStatus("ok","Cotización actualizada · " + timeLabel(state.rates.ts));
-      } else {
-        useCacheOrFail();
-      }
+      } else { useCacheOrFail(); }
     }).catch(useCacheOrFail);
   }
-
   function useCacheOrFail(){
-    if(state.rates.blue || state.rates.oficial || state.rates.eur){
-      render();
-      setStatus("err","Sin conexión — mostrando última cotización" + (state.rates.ts ? " · " + timeLabel(state.rates.ts) : ""));
-    } else {
-      setStatus("err","No se pudo obtener la cotización. Tocá Actualizar.");
-    }
+    if(state.rates && (state.rates.blue||state.rates.oficial||state.rates.mep||state.rates.tarjeta||state.rates.eur)){
+      renderResults(false);
+      setStatus("err","Sin conexión — última cotización" + (state.rates.ts ? " · " + timeLabel(state.rates.ts) : ""));
+    } else { setStatus("err","No se pudo obtener la cotización"); }
   }
 
-  function timeLabel(ts){
-    try{
-      return new Date(ts).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
-    }catch(e){ return ""; }
+  // ---------- segmented control ----------
+  function movePill(){
+    var idx = ["blue","oficial","mep","tarjeta"].indexOf(state.rateType);
+    $segPill.style.transform = "translateX(" + (idx*100) + "%)";
   }
-
-  // ---------- events ----------
-  $amount.addEventListener("input", function(){
-    var pos = $amount.selectionStart;
-    var before = $amount.value.length;
-    $amount.value = formatLiveInput($amount.value);
-    // best-effort caret keep
-    var after = $amount.value.length;
-    var newPos = Math.max(0, pos + (after - before));
-    try{ $amount.setSelectionRange(newPos,newPos); }catch(e){}
-    render();
-  });
-
-  $refresh.addEventListener("click", refresh);
-
-  $toggle.addEventListener("click", function(e){
-    var btn = e.target.closest("button[data-rate]");
-    if(!btn) return;
+  $seg.addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-rate]"); if(!btn) return;
     state.rateType = btn.getAttribute("data-rate");
-    Array.prototype.forEach.call($toggle.querySelectorAll("button"), function(b){
-      b.classList.toggle("active", b === btn);
-    });
-    render();
+    Array.prototype.forEach.call($seg.querySelectorAll("button"), function(b){ b.classList.toggle("active", b === btn); });
+    haptic(6); movePill(); renderResults(true);
   });
 
   // ---------- init ----------
-  if(loadCache()){ render(); if(state.rates.ts) setStatus("ok","Última cotización · "+timeLabel(state.rates.ts)); }
-  $amount.focus();
+  movePill();
+  renderAmount();
+  if(loadCache()){ renderResults(false); if(state.rates.ts) setStatus("ok","Última cotización · " + timeLabel(state.rates.ts)); }
   refresh();
-  // auto-refresh when app regains focus
   document.addEventListener("visibilitychange", function(){ if(!document.hidden) refresh(); });
+  setInterval(function(){ if(!document.hidden) refresh(); }, 90000);
 })();
 </script>
 </body>
