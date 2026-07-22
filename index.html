@@ -215,9 +215,9 @@
 
     <nav class="seg" id="seg" aria-label="Tipo de cambio">
       <span class="pill" id="segPill"></span>
-      <button data-rate="blue" class="active">Blue</button>
+      <button data-rate="takenos" class="active">Takenos</button>
+      <button data-rate="blue">Blue</button>
       <button data-rate="oficial">Oficial</button>
-      <button data-rate="mep">MEP</button>
       <button data-rate="tarjeta">Tarjeta</button>
     </nav>
 
@@ -284,16 +284,17 @@
   var API = {
     blue:    "https://dolarapi.com/v1/dolares/blue",
     oficial: "https://dolarapi.com/v1/dolares/oficial",
-    mep:     "https://dolarapi.com/v1/dolares/bolsa",
     tarjeta: "https://dolarapi.com/v1/dolares/tarjeta",
     eur:     "https://dolarapi.com/v1/cotizaciones/eur"
   };
+  // Takenos: synthetic rate = oficial + K*(blue - oficial). K observed from a real op.
+  var TAKENOS_K = 0.67;
   var LS_KEY = "pesos_rates_v2";
   var THEME_KEY = "pesos_theme";
 
   // active: which field the keypad edits — "ars" | "usd" | "eur"
   // raw: the raw text of the active field.  baseArs: canonical peso amount.
-  var state = { active:"ars", raw:"", baseArs:0, rateType:"blue", rates:{} };
+  var state = { active:"ars", raw:"", baseArs:0, rateType:"takenos", rates:{} };
 
   var el = function(id){ return document.getElementById(id); };
   var $disp = el("amountDisplay");
@@ -344,11 +345,24 @@
   }
 
   // ---------- rates ----------
-  function usdRateFor(type){ var r = state.rates[type]; return (r && r.venta) ? r : null; }
+  function usdRateFor(type){
+    if(type === "takenos"){
+      var o = state.rates.oficial, bl = state.rates.blue;
+      if(!o || !o.venta || !bl || !bl.venta) return null;
+      var mix = function(a,b){ return a + TAKENOS_K * (b - a); };
+      return {
+        venta:  mix(o.venta, bl.venta),
+        compra: (o.compra && bl.compra) ? mix(o.compra, bl.compra) : mix(o.venta, bl.venta),
+        estimated: true
+      };
+    }
+    var r = state.rates[type];
+    return (r && r.venta) ? r : null;
+  }
   function eurRateFor(type){
     var eur = state.rates.eur;
     if(!eur || !eur.venta) return null;
-    var of = state.rates.oficial, sel = state.rates[type];
+    var of = state.rates.oficial, sel = usdRateFor(type);
     var factor = 1;
     if(of && of.venta && sel && sel.venta) factor = sel.venta / of.venta;
     return { compra:(eur.compra||eur.venta)*factor, venta:eur.venta*factor, scaled:(type!=="oficial") };
@@ -403,8 +417,10 @@
     renderResult("usd", $usdVal, "US$", u);
     renderResult("eur", $eurVal, "€", e);
     if(u){
-      $usdRate.textContent = "1 USD = $" + nfRate.format(u.venta);
-      $usdSpread.textContent = "compra $" + nfRate.format(u.compra||u.venta) + " · venta $" + nfRate.format(u.venta);
+      $usdRate.textContent = "1 USD = $" + nfRate.format(u.venta) + (u.estimated ? " *" : "");
+      $usdSpread.textContent = u.estimated
+        ? "Estimación: 67% de la brecha oficial–blue"
+        : "compra $" + nfRate.format(u.compra||u.venta) + " · venta $" + nfRate.format(u.venta);
     }
     if(e){
       $eurRate.textContent = "1 EUR = $" + nfRate.format(e.venta) + (e.scaled ? " *" : "");
@@ -416,7 +432,7 @@
     el("card-eur").classList.toggle("active", state.active === "eur");
     $clear.hidden = (state.raw === "" && state.baseArs === 0);
   }
-  function labelFor(t){ return ({blue:"blue",oficial:"oficial",mep:"MEP",tarjeta:"tarjeta"})[t] || t; }
+  function labelFor(t){ return ({takenos:"Takenos",blue:"blue",oficial:"oficial",tarjeta:"tarjeta"})[t] || t; }
 
   // ---------- editing ----------
   function setActive(field){
@@ -490,13 +506,13 @@
   function saveCache(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state.rates)); }catch(e){} }
   function loadCache(){
     try{ var c = JSON.parse(localStorage.getItem(LS_KEY));
-      if(c && (c.blue||c.oficial||c.mep||c.tarjeta||c.eur)){ state.rates = c; return true; } }catch(e){}
+      if(c && (c.blue||c.oficial||c.tarjeta||c.eur)){ state.rates = c; return true; } }catch(e){}
     return false;
   }
   function fetchJSON(url){ return fetch(url,{cache:"no-store"}).then(function(r){ if(!r.ok) throw 0; return r.json(); }); }
   function refresh(){
     setStatus("loading","Obteniendo cotización…");
-    var keys = ["blue","oficial","mep","tarjeta","eur"];
+    var keys = ["blue","oficial","tarjeta","eur"];
     Promise.allSettled(keys.map(function(k){ return fetchJSON(API[k]); })).then(function(res){
       var got = false;
       res.forEach(function(r,i){ if(r.status === "fulfilled"){ state.rates[keys[i]] = r.value; got = true; } });
@@ -509,7 +525,7 @@
     }).catch(useCacheOrFail);
   }
   function useCacheOrFail(){
-    if(state.rates && (state.rates.blue||state.rates.oficial||state.rates.mep||state.rates.tarjeta||state.rates.eur)){
+    if(state.rates && (state.rates.blue||state.rates.oficial||state.rates.tarjeta||state.rates.eur)){
       render();
       setStatus("err","Sin conexión — última cotización" + (state.rates.ts ? " · " + timeLabel(state.rates.ts) : ""));
     } else { setStatus("err","No se pudo obtener la cotización"); }
@@ -517,7 +533,7 @@
 
   // ---------- segmented control ----------
   function movePill(){
-    var idx = ["blue","oficial","mep","tarjeta"].indexOf(state.rateType);
+    var idx = ["takenos","blue","oficial","tarjeta"].indexOf(state.rateType);
     $segPill.style.transform = "translateX(" + (idx*100) + "%)";
   }
   $seg.addEventListener("click", function(e){
