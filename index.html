@@ -56,6 +56,12 @@
     --pop:cubic-bezier(.34,1.56,.64,1);
 
     --amt:3;          /* tamaño base del monto, en rem — lo lee fitFont() */
+
+    /* Aire alrededor de la fila de atajos.  Va atado a svh y no a media queries
+       porque iOS las evalúa contra el viewport GRANDE: en un teléfono alto con
+       la barra desplegada mentirían y dejarían los chips pegados. */
+    --q-air:clamp(5px, calc(7.5svh - 38px), 14px);
+    --q-pad:clamp(5px, calc(4.6svh - 20px), 11px);
   }
 
   @media (prefers-color-scheme: dark){ :root:not([data-theme]){
@@ -140,7 +146,7 @@
     border:1px solid var(--stroke);
     border-radius:var(--r-lg);
     box-shadow:var(--shadow-lg);
-    padding:12px 18px 13px;
+    padding:11px 18px 12px;
   }
   .amount-card.active{box-shadow:var(--shadow-lg), inset 0 0 0 2px var(--accent-strong);}
   .amount-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
@@ -165,14 +171,14 @@
   .clear-btn[hidden]{display:none;}
 
   /* ---------- segmented control ---------- */
-  .seg{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:12px 3px 0;background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;padding:4px;box-shadow:var(--shadow-sm);}
+  .seg{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:11px 3px 0;background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;padding:4px;box-shadow:var(--shadow-sm);}
   .seg .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(25% - 3px);background:var(--pill);border-radius:999px;
     box-shadow:var(--shadow-sm), inset 0 0 0 1px var(--pill-ring);transition:transform .32s var(--ease);z-index:0;}
   .seg button{position:relative;z-index:1;border:none;background:none;padding:7px 0;font-size:.79rem;font-weight:700;color:var(--ink-3);cursor:pointer;border-radius:999px;transition:color .2s ease;white-space:nowrap;}
   .seg button.active{color:var(--accent-strong);font-weight:800;}
 
   /* ---------- results ---------- */
-  .results{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:12px;}
+  .results{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:11px;}
   .rc{position:relative;background:var(--surface);border:1px solid var(--stroke);border-radius:var(--r-md);box-shadow:var(--shadow-md);padding:12px 13px 11px;overflow:hidden;}
   .rc.active{box-shadow:var(--shadow-md), inset 0 0 0 2px var(--accent-strong);}
   .rc::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--accentc);opacity:.9;}
@@ -200,7 +206,7 @@
     display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
 
   /* ---------- status ---------- */
-  .status{display:flex;align-items:center;justify-content:center;gap:7px;margin:11px 0 0;font-size:.66rem;font-weight:600;color:var(--ink-3);}
+  .status{display:flex;align-items:center;justify-content:center;gap:7px;margin:9px 0 0;font-size:.66rem;font-weight:600;color:var(--ink-3);}
   .status .dot{width:7px;height:7px;border-radius:50%;background:#33c481;box-shadow:0 0 0 3px rgba(51,196,129,.16);}
   .status.err .dot{background:#ef5b5b;box-shadow:0 0 0 3px rgba(239,91,91,.16);}
   .status.loading .dot{background:var(--gold);animation:pulse 1s infinite;}
@@ -209,9 +215,9 @@
   /* ---------- keypad ---------- */
   /* El teclado se estira para ocupar el sobrante: sin hueco muerto en el medio
      y sin que nada se mueva, porque el sobrante lo absorben las teclas. */
-  .keypad-wrap{display:flex;flex-direction:column;flex:1;min-height:0;padding-top:8px;}
-  .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:7px;flex:none;}
-  .quick button{border:1px solid var(--stroke);background:var(--surface-2);color:var(--ink-2);font-size:.8rem;font-weight:700;padding:8px 0;border-radius:var(--r-sm);cursor:pointer;transition:transform .12s var(--pop),background .2s;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .keypad-wrap{display:flex;flex-direction:column;flex:1;min-height:0;padding-top:var(--q-air);}
+  .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:var(--q-pad);flex:none;}
+  .quick button{border:1px solid var(--stroke);background:var(--surface-2);color:var(--ink-2);font-size:.82rem;font-weight:700;padding:var(--q-pad) 0;border-radius:var(--r-sm);cursor:pointer;transition:transform .12s var(--pop),background .2s;font-variant-numeric:tabular-nums;white-space:nowrap;}
   .quick button.clear{color:var(--accent-strong);}
   .quick button:active{transform:scale(.93);background:var(--surface);}
 
@@ -228,9 +234,10 @@
 
   /* Pantallas cortas (SE, minis): comprime lo justo para que todo entre sin
      scroll.  Si la página no scrollea, iOS nunca colapsa su barra y no hay salto.
-     El umbral va sobre el viewport grande, que es contra el que iOS evalúa las
-     media queries de alto. */
-  @media (max-height:740px){
+     El umbral va sobre el alto ÚTIL (con la barra de Safari desplegada), que es
+     contra el que iOS evalúa las media queries de alto: 640px deja afuera a los
+     iPhone modernos (659-745 útiles) y sólo alcanza al SE y a los mini. */
+  @media (max-height:640px){
     .app{padding-top:calc(env(safe-area-inset-top) + 4px);}
     .topbar{margin-bottom:7px;min-height:36px;}
     .icon-btn{width:36px;height:36px;}
@@ -240,30 +247,25 @@
     .seg{margin-top:9px;}
     .results{margin-top:9px;gap:9px;}
     .rc{padding:10px 12px 9px;}
-    .keypad-wrap{padding-top:6px;}
-    .quick{gap:6px;margin-bottom:6px;}
-    .quick button{padding:6px 0;}
     .keypad{gap:6px;}
     .status{margin-top:8px;}
   }
 
   /* Pantallas muy cortas (iPhone SE): segundo nivel, para que tampoco scrollee. */
-  @media (max-height:700px){
+  @media (max-height:580px){
     :root{--amt:2.4;}
     .app{padding-bottom:calc(env(safe-area-inset-bottom) + 8px);}
     .topbar{min-height:34px;margin-bottom:6px;}
     .seg{margin-top:8px;}
     .results{margin-top:8px;}
-    .quick{gap:5px;margin-bottom:5px;}
+    .quick{gap:5px;}
     .keypad{gap:5px;}
-    .keypad-wrap{padding-top:4px;}
     .amount-card{padding:8px 14px 9px;}
     .amount-row{min-height:38px;}
     .amount-row .sym{font-size:1.45rem;}
     .seg button{padding:6px 0;}
     .rc{padding:9px 11px 8px;}
-    .quick button{padding:5px 0;font-size:.76rem;}
-    .key{min-height:clamp(38px,6.3svh,52px);font-size:clamp(1.32rem,3.9svh,1.7rem);}
+    .key{min-height:clamp(37px,6.3svh,52px);font-size:clamp(1.32rem,3.9svh,1.7rem);}
     .status{margin-top:3px;}
   }
 

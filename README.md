@@ -31,7 +31,10 @@ keypad and watch the equivalents update live. Convert **from pesos** (default,
   cannot move the layout either; the UI is compacted on short screens so it
   fits without scrolling at all (down to the iPhone SE). The keypad stretches
   to fill whatever is left over, so there is no dead space in the middle and
-  the slack lands in bigger keys instead.
+  the slack lands in bigger keys instead. Note iOS evaluates `max-height`
+  media queries against the *usable* height (address bar showing), so the
+  compaction thresholds are set against that, and the quick-chip spacing is
+  driven by `svh` clamps rather than a breakpoint.
 - Live rates from [dolarapi.com](https://dolarapi.com); last value cached in
   `localStorage` so it still works offline. Auto-refreshes on focus and every 90s.
 - Adaptive **light / dark** theme, `prefers-reduced-motion` support, safe-area aware.
