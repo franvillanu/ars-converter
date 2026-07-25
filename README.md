@@ -1,13 +1,19 @@
 # Pesos — ARS → USD / EUR
 
-Mobile-first, single-file peso converter. Punch in an amount in Argentine pesos
-on the built-in keypad and watch the USD and EUR equivalents update live.
+Mobile-first, single-file peso converter. Punch in an amount on the built-in
+keypad and watch the equivalents update live. Convert **from pesos** (default,
+→ USD / EUR) or flip the `$ / €` toggle to convert **from euros** (→ ARS / USD)
+— handy when you are travelling in Spain.
 
 **Live:** https://franvillanu.github.io/ars-converter/
 
 ## Features
 - **Bespoke numeric keypad** — no OS keyboard; big one-handed targets, press
-  animation, haptic feedback, and `+1K / +5K / +10K` quick-add chips.
+  animation, haptic feedback, and quick-add chips that follow the currency you
+  are typing (`+1K / +5K / +10K` for pesos, `+10 / +50 / +100` for USD / EUR).
+- **Base-currency toggle (`$` / `€`)** next to the theme button — picks which
+  currency the big card holds; the choice persists in `localStorage`
+  (`pesos_base`, default `ars`).
 - **Edit any field** — tap ARS, USD, or EUR to make it the input; the other two
   convert automatically (enter dollars → see pesos, etc.).
 - Markets in a sliding segmented control: **Takenos · Blue · Oficial · Tarjeta**.
@@ -18,6 +24,9 @@ on the built-in keypad and watch the USD and EUR equivalents update live.
   (scaled off the official euro; estimates flagged with `*`).
 - Auto-fitting amounts (scale to fit any screen width), sun/moon **theme toggle**
   (persists, else follows system), pinch/double-tap zoom disabled.
+- **Jump-free layout** — every text row in the result cards has a fixed box, so a
+  longer rate or a wrapped note never reflows the page while you type or switch
+  markets.
 - Live rates from [dolarapi.com](https://dolarapi.com); last value cached in
   `localStorage` so it still works offline. Auto-refreshes on focus and every 90s.
 - Adaptive **light / dark** theme, `prefers-reduced-motion` support, safe-area aware.
@@ -39,4 +48,6 @@ python3 -m http.server 8080
 | Tarjeta | `https://dolarapi.com/v1/dolares/tarjeta` |
 | Euro    | `https://dolarapi.com/v1/cotizaciones/eur` |
 
-Conversion uses each source's `venta` (sell) value: `equiv = ARS / rate`.
+Conversion uses each source's `venta` (sell) value: `equiv = ARS / rate`. Pesos
+are always the internal pivot, so euro-base mode converts `EUR → ARS → USD` with
+the same quotes.

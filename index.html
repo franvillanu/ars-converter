@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pesos">
-<meta name="description" content="Conversor de pesos argentinos a USD y EUR con cotización en vivo.">
+<meta name="description" content="Conversor de pesos argentinos a USD y EUR (o de euros a pesos y dólares) con cotización en vivo.">
 <title>Pesos · ARS → USD / EUR</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2374ACDF'/%3E%3Cpath d='M50 20l6.5 13.2 14.6 2.1-10.5 10.3 2.5 14.5L50 63.3 36.4 60.4l2.5-14.5-10.5-10.3 14.6-2.1z' fill='%23F6B40E'/%3E%3C/svg%3E">
 <style>
@@ -38,6 +38,8 @@
     --usd-tint:rgba(18,128,92,0.10);
     --eur:#3f57c9;
     --eur-tint:rgba(63,87,201,0.10);
+    --ars:#2f7ec0;
+    --ars-tint:rgba(47,126,192,0.10);
 
     --shadow-sm:0 1px 2px rgba(11,30,56,.06), 0 2px 6px rgba(11,30,56,.06);
     --shadow-md:0 6px 18px rgba(11,30,56,.10), 0 2px 6px rgba(11,30,56,.06);
@@ -56,6 +58,7 @@
     --stroke:rgba(255,255,255,0.07); --stroke-strong:rgba(255,255,255,0.13);
     --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:var(--celeste-soft);
     --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#8ea0ff; --eur-tint:rgba(142,160,255,0.14);
+    --ars:#9ec9ee; --ars-tint:rgba(158,201,238,0.13);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   } }
   :root[data-theme="dark"]{
@@ -64,6 +67,7 @@
     --stroke:rgba(255,255,255,0.07); --stroke-strong:rgba(255,255,255,0.13);
     --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:var(--celeste-soft);
     --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#8ea0ff; --eur-tint:rgba(142,160,255,0.14);
+    --ars:#9ec9ee; --ars-tint:rgba(158,201,238,0.13);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   }
 
@@ -95,13 +99,22 @@
       radial-gradient(120% 68% at 50% -8%, var(--glow) 0%, transparent 60%),
       linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);}
 
-  /* ---------- top bar (theme toggle only) ---------- */
-  .topbar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:10px;min-height:40px;}
+  /* ---------- top bar (base currency + theme) ---------- */
+  .topbar{display:flex;justify-content:flex-end;align-items:center;gap:9px;margin-bottom:10px;min-height:40px;}
   .icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--stroke);background:var(--surface);color:var(--ink-2);
     display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-sm);
     transition:transform .14s var(--pop),background .2s;}
   .icon-btn:active{transform:scale(.9);}
   .icon-btn svg{width:20px;height:20px;}
+
+  /* base-currency toggle: $ / € */
+  .base-toggle{position:relative;display:grid;grid-template-columns:1fr 1fr;height:40px;padding:4px;
+    background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;box-shadow:var(--shadow-sm);}
+  .base-toggle .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);background:var(--surface);
+    border-radius:999px;box-shadow:var(--shadow-sm);transition:transform .3s var(--ease);z-index:0;}
+  .base-toggle button{position:relative;z-index:1;width:38px;border:none;background:none;border-radius:999px;
+    font-size:1.02rem;font-weight:800;line-height:1;color:var(--ink-3);cursor:pointer;transition:color .2s ease;}
+  .base-toggle button.active{color:var(--accent-strong);}
 
   /* ---------- editable field: shared ---------- */
   .field{cursor:pointer;transition:box-shadow .2s var(--ease),border-color .2s ease;}
@@ -118,7 +131,9 @@
   .amount-card.active{box-shadow:var(--shadow-lg), inset 0 0 0 2px var(--accent-strong);}
   .amount-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
   .amount-head .label{display:flex;align-items:center;gap:8px;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);}
-  .sol-dot{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%, var(--gold-soft), var(--gold));box-shadow:0 0 0 3px rgba(246,180,14,.18);}
+  .cur-dot{width:14px;height:14px;border-radius:50%;flex:none;}
+  .cur-dot.ars{background:radial-gradient(circle at 35% 30%, var(--gold-soft), var(--gold));box-shadow:0 0 0 3px rgba(246,180,14,.18);}
+  .cur-dot.eur{background:radial-gradient(circle at 35% 30%, var(--celeste-soft), var(--eur));box-shadow:0 0 0 3px var(--eur-tint);}
   .amount-head .badge{font-size:.64rem;font-weight:700;color:var(--accent-strong);background:var(--surface-2);border:1px solid var(--stroke);padding:3px 9px;border-radius:999px;}
 
   .amount-row{display:flex;align-items:baseline;gap:6px;min-height:52px;}
@@ -138,7 +153,7 @@
   /* ---------- segmented control ---------- */
   .seg{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:12px 3px 0;background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;padding:4px;box-shadow:var(--shadow-sm);}
   .seg .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(25% - 3px);background:var(--surface);border-radius:999px;box-shadow:var(--shadow-sm);transition:transform .32s var(--ease);z-index:0;}
-  .seg button{position:relative;z-index:1;border:none;background:none;padding:7px 0;font-size:.79rem;font-weight:700;color:var(--ink-3);cursor:pointer;border-radius:999px;transition:color .2s ease;}
+  .seg button{position:relative;z-index:1;border:none;background:none;padding:7px 0;font-size:.79rem;font-weight:700;color:var(--ink-3);cursor:pointer;border-radius:999px;transition:color .2s ease;white-space:nowrap;}
   .seg button.active{color:var(--accent-strong);}
 
   /* ---------- results ---------- */
@@ -148,17 +163,26 @@
   .rc::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--accentc);opacity:.9;}
   .rc.usd{--accentc:var(--usd);}
   .rc.eur{--accentc:var(--eur);}
+  .rc.ars{--accentc:var(--ars);}
   .rc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
   .chip{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:800;letter-spacing:.02em;padding:4px 9px 4px 7px;border-radius:999px;}
   .rc.usd .chip{color:var(--usd);background:var(--usd-tint);}
   .rc.eur .chip{color:var(--eur);background:var(--eur-tint);}
+  .rc.ars .chip{color:var(--ars);background:var(--ars-tint);}
   .chip .fx{font-size:1rem;line-height:1;}
-  .rc .full{font-size:.6rem;font-weight:600;color:var(--ink-3);letter-spacing:.02em;}
-  .rc .value{font-size:1.62rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:clip;margin-top:2px;}
+  .rc .full{font-size:.6rem;font-weight:600;color:var(--ink-3);letter-spacing:.02em;line-height:.78rem;height:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* height fixed in rem (not em) so the JS auto-shrink never changes the box */
+  .rc .value{font-size:1.62rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.7rem;height:1.7rem;white-space:nowrap;overflow:hidden;text-overflow:clip;margin-top:2px;}
   .rc .value .cents{color:var(--ink-2);font-weight:700;}
   .rc .sub{margin-top:7px;padding-top:7px;border-top:1px dashed var(--stroke-strong);display:flex;flex-direction:column;gap:2px;}
-  .rc .rate{font-size:.66rem;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;}
-  .rc .spread{font-size:.58rem;color:var(--ink-3);font-variant-numeric:tabular-nums;}
+  /* Both sub-lines keep a fixed box: the rate never wraps (it is shrunk to fit by
+     JS instead) and the note always reserves two lines, so the card height is the
+     same on every device and for every market — no reflow of the layout below. */
+  .rc .rate{font-size:.66rem;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;
+    white-space:nowrap;overflow:hidden;line-height:.86rem;height:.86rem;}
+  .rc .spread{font-size:.58rem;color:var(--ink-3);font-variant-numeric:tabular-nums;
+    line-height:.76rem;height:1.52rem;
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
 
   /* ---------- status ---------- */
   .status{display:flex;align-items:center;justify-content:center;gap:7px;margin:11px 0 0;font-size:.66rem;font-weight:600;color:var(--ink-3);}
@@ -170,7 +194,7 @@
   /* ---------- keypad ---------- */
   .keypad-wrap{margin-top:auto;padding-top:8px;}
   .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:7px;}
-  .quick button{border:1px solid var(--stroke);background:var(--surface-2);color:var(--ink-2);font-size:.8rem;font-weight:700;padding:8px 0;border-radius:var(--r-sm);cursor:pointer;transition:transform .12s var(--pop),background .2s;font-variant-numeric:tabular-nums;}
+  .quick button{border:1px solid var(--stroke);background:var(--surface-2);color:var(--ink-2);font-size:.8rem;font-weight:700;padding:8px 0;border-radius:var(--r-sm);cursor:pointer;transition:transform .12s var(--pop),background .2s;font-variant-numeric:tabular-nums;white-space:nowrap;}
   .quick button.clear{color:var(--accent-strong);}
   .quick button:active{transform:scale(.93);background:var(--surface);}
 
@@ -196,16 +220,21 @@
 
   <div class="app">
     <div class="topbar">
+      <div class="base-toggle" id="baseToggle" role="group" aria-label="Moneda a convertir">
+        <span class="pill" id="basePill"></span>
+        <button type="button" data-base="ars" aria-label="Convertir desde pesos argentinos">$</button>
+        <button type="button" data-base="eur" aria-label="Convertir desde euros">€</button>
+      </div>
       <button id="themeBtn" class="icon-btn" aria-label="Cambiar tema (claro/oscuro)"></button>
     </div>
 
-    <section class="amount-card field active" id="card-ars" data-field="ars" role="button" tabindex="0" aria-label="Editar monto en pesos">
+    <section class="amount-card field active" id="card-main" data-field="ars" role="button" tabindex="0" aria-label="Editar monto en pesos argentinos">
       <div class="amount-head">
-        <span class="label"><span class="sol-dot"></span> Pesos argentinos</span>
-        <span class="badge">ARS</span>
+        <span class="label"><span class="cur-dot ars" id="mainDot"></span> <span id="mainName">Pesos argentinos</span></span>
+        <span class="badge" id="mainBadge">ARS</span>
       </div>
       <div class="amount-row">
-        <span class="sym">$</span>
+        <span class="sym" id="mainSym">$</span>
         <div id="amountDisplay" class="empty">0<span class="caret"></span></div>
         <button id="clearBtn" class="clear-btn" aria-label="Borrar todo" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -222,26 +251,26 @@
     </nav>
 
     <section class="results">
-      <div class="rc usd field" id="card-usd" data-field="usd" role="button" tabindex="0" aria-label="Editar monto en dólares">
+      <div class="rc usd field" id="card-r1" data-field="usd" role="button" tabindex="0" aria-label="Editar monto en dólares">
         <div class="rc-top">
-          <span class="chip"><span class="fx">🇺🇸</span> USD</span>
+          <span class="chip"><span class="fx">🇺🇸</span> <span class="code">USD</span></span>
         </div>
         <div class="full">Dólar estadounidense</div>
-        <div class="value" id="usdVal">—</div>
+        <div class="value">—</div>
         <div class="sub">
-          <span class="rate" id="usdRate">cargando…</span>
-          <span class="spread" id="usdSpread"></span>
+          <span class="rate">cargando…</span>
+          <span class="spread"></span>
         </div>
       </div>
-      <div class="rc eur field" id="card-eur" data-field="eur" role="button" tabindex="0" aria-label="Editar monto en euros">
+      <div class="rc eur field" id="card-r2" data-field="eur" role="button" tabindex="0" aria-label="Editar monto en euros">
         <div class="rc-top">
-          <span class="chip"><span class="fx">🇪🇺</span> EUR</span>
+          <span class="chip"><span class="fx">🇪🇺</span> <span class="code">EUR</span></span>
         </div>
         <div class="full">Euro</div>
-        <div class="value" id="eurVal">—</div>
+        <div class="value">—</div>
         <div class="sub">
-          <span class="rate" id="eurRate">cargando…</span>
-          <span class="spread" id="eurSpread"></span>
+          <span class="rate">cargando…</span>
+          <span class="spread"></span>
         </div>
       </div>
     </section>
@@ -291,20 +320,43 @@
   var TAKENOS_K = 0.67;
   var LS_KEY = "pesos_rates_v2";
   var THEME_KEY = "pesos_theme";
+  var BASE_KEY = "pesos_base";     // moneda de partida: "ars" (default) | "eur"
 
+  var CUR = {
+    ars:{ code:"ARS", sym:"$",   name:"Pesos argentinos", full:"Peso argentino",       flag:"🇦🇷" },
+    usd:{ code:"USD", sym:"US$", name:"Dólares",         full:"Dólar estadounidense", flag:"🇺🇸" },
+    eur:{ code:"EUR", sym:"€",   name:"Euros",           full:"Euro",                 flag:"🇪🇺" }
+  };
+  // [ tarjeta grande, resultado izquierdo, resultado derecho ] por moneda de partida
+  var LAYOUT = { ars:["ars","usd","eur"], eur:["eur","ars","usd"] };
+  // atajos del teclado, segun la moneda que se esta tipeando
+  var QUICK = {
+    ars:[[1000,"+1K"],[5000,"+5K"],[10000,"+10K"]],
+    usd:[[10,"+10"],[50,"+50"],[100,"+100"]],
+    eur:[[10,"+10"],[50,"+50"],[100,"+100"]]
+  };
+
+  // base:   moneda que ocupa la tarjeta grande (la que el usuario convierte).
   // active: which field the keypad edits — "ars" | "usd" | "eur"
   // raw: the raw text of the active field.  baseArs: canonical peso amount.
-  var state = { active:"ars", raw:"", baseArs:0, rateType:"takenos", rates:{} };
+  var state = { base:"ars", active:"ars", raw:"", baseArs:0, rateType:"takenos", rates:{} };
 
   var el = function(id){ return document.getElementById(id); };
   var $disp = el("amountDisplay");
   var $clear = el("clearBtn");
-  var $usdVal = el("usdVal"), $eurVal = el("eurVal");
-  var $usdRate = el("usdRate"), $eurRate = el("eurRate");
-  var $usdSpread = el("usdSpread"), $eurSpread = el("eurSpread");
+  var $main = el("card-main"), $mainDot = el("mainDot"), $mainName = el("mainName"),
+      $mainBadge = el("mainBadge"), $mainSym = el("mainSym");
   var $status = el("status"), $statusText = el("statusText");
   var $seg = el("seg"), $segPill = el("segPill");
   var $theme = el("themeBtn");
+  var $baseToggle = el("baseToggle"), $basePill = el("basePill");
+  var $quick = el("quick");
+  var $quickAdds = Array.prototype.slice.call($quick.querySelectorAll("button[data-add]"));
+  var RC = ["card-r1","card-r2"].map(function(id){
+    var n = el(id);
+    return { node:n, fx:n.querySelector(".fx"), code:n.querySelector(".code"), full:n.querySelector(".full"),
+             val:n.querySelector(".value"), rate:n.querySelector(".rate"), spread:n.querySelector(".spread") };
+  });
 
   var nfInt = new Intl.NumberFormat("es-AR");
   var nfArs = new Intl.NumberFormat("es-AR",{maximumFractionDigits:2});
@@ -392,47 +444,92 @@
     }
   }
   function fitFont(){ autofit($disp, 3, 1.3); }
-  function renderArs(){
-    if(state.active === "ars"){
+
+  function renderMain(){
+    var f = state.base;
+    if(state.active === f){
       $disp.classList.toggle("empty", state.raw === "");
       $disp.innerHTML = formatRaw(state.raw) + caret();
     } else {
-      $disp.classList.toggle("empty", state.baseArs === 0);
-      $disp.innerHTML = state.baseArs === 0 ? "0" : nfArs.format(state.baseArs);
+      var v = fieldNumeric(f);
+      $disp.classList.toggle("empty", v === 0);
+      $disp.innerHTML = v === 0 ? "0" : nfArs.format(v);
     }
     fitFont();
   }
-  function renderResult(field, $node, prefix, rate){
-    if(state.active === field){
-      $node.innerHTML = prefix + " " + formatRaw(state.raw) + caret();
-    } else {
-      $node.innerHTML = rate ? prefix + " " + splitCents(nfMoney.format(fieldNumeric(field))) : "—";
+
+  // Cotización que muestra una tarjeta de resultado.  El peso sólo aparece como
+  // resultado cuando la base es el euro, así que usa la cotización del euro.
+  function subFor(field){
+    if(field === "usd"){
+      var u = usdRateFor(state.rateType);
+      if(!u) return null;
+      return { rate:"1 USD = $" + nfRate.format(u.venta) + (u.estimated ? " *" : ""),
+               spread:u.estimated ? "Estimación: 67% de la brecha oficial–blue"
+                                  : "compra $" + nfRate.format(u.compra||u.venta) + " · venta $" + nfRate.format(u.venta) };
     }
-    autofit($node, 1.62, 0.95);
-  }
-  function render(){
-    var u = usdRateFor(state.rateType);
     var e = eurRateFor(state.rateType);
-    renderArs();
-    renderResult("usd", $usdVal, "US$", u);
-    renderResult("eur", $eurVal, "€", e);
-    if(u){
-      $usdRate.textContent = "1 USD = $" + nfRate.format(u.venta) + (u.estimated ? " *" : "");
-      $usdSpread.textContent = u.estimated
-        ? "Estimación: 67% de la brecha oficial–blue"
-        : "compra $" + nfRate.format(u.compra||u.venta) + " · venta $" + nfRate.format(u.venta);
+    if(!e) return null;
+    return { rate:"1 EUR = $" + nfRate.format(e.venta) + (e.scaled ? " *" : ""),
+             spread:e.scaled ? "estimado s/ mercado " + labelFor(state.rateType)
+                             : "compra $" + nfRate.format(e.compra) + " · venta $" + nfRate.format(e.venta) };
+  }
+
+  function renderResult(rc){
+    var field = rc.node.getAttribute("data-field");
+    var info = subFor(field), sym = CUR[field].sym;
+    if(state.active === field){
+      rc.val.innerHTML = sym + " " + formatRaw(state.raw) + caret();
+    } else {
+      rc.val.innerHTML = info ? sym + " " + splitCents(nfMoney.format(fieldNumeric(field))) : "—";
     }
-    if(e){
-      $eurRate.textContent = "1 EUR = $" + nfRate.format(e.venta) + (e.scaled ? " *" : "");
-      $eurSpread.textContent = e.scaled ? "estimado s/ mercado " + labelFor(state.rateType)
-                                        : "compra $" + nfRate.format(e.compra) + " · venta $" + nfRate.format(e.venta);
-    }
-    el("card-ars").classList.toggle("active", state.active === "ars");
-    el("card-usd").classList.toggle("active", state.active === "usd");
-    el("card-eur").classList.toggle("active", state.active === "eur");
+    autofit(rc.val, 1.62, 0.95);
+    rc.rate.textContent = info ? info.rate : "cargando…";
+    rc.spread.textContent = info ? info.spread : "";
+    autofit(rc.rate, 0.66, 0.5);
+  }
+
+  function renderQuick(){
+    var q = QUICK[state.active] || QUICK.ars;
+    $quickAdds.forEach(function(b, i){
+      b.setAttribute("data-add", q[i][0]);
+      b.textContent = q[i][1];
+    });
+  }
+
+  function render(){
+    renderMain();
+    RC.forEach(renderResult);
+    renderQuick();
+    $main.classList.toggle("active", state.active === state.base);
+    RC.forEach(function(rc){ rc.node.classList.toggle("active", state.active === rc.node.getAttribute("data-field")); });
     $clear.hidden = (state.raw === "" && state.baseArs === 0);
   }
   function labelFor(t){ return ({takenos:"Takenos",blue:"blue",oficial:"oficial",tarjeta:"tarjeta"})[t] || t; }
+
+  // ---------- moneda de partida ($ / €) ----------
+  function applyBase(){
+    var L = LAYOUT[state.base], m = CUR[L[0]];
+    $main.setAttribute("data-field", L[0]);
+    $main.setAttribute("aria-label", "Editar monto en " + m.name.toLowerCase());
+    $mainDot.className = "cur-dot " + L[0];
+    $mainName.textContent = m.name;
+    $mainBadge.textContent = m.code;
+    $mainSym.textContent = m.sym;
+    RC.forEach(function(rc, i){
+      var f = L[i+1], c = CUR[f];
+      rc.node.setAttribute("data-field", f);
+      rc.node.setAttribute("aria-label", "Editar monto en " + c.name.toLowerCase());
+      rc.node.className = "rc field " + f;
+      rc.fx.textContent = c.flag;
+      rc.code.textContent = c.code;
+      rc.full.textContent = c.full;
+    });
+    Array.prototype.forEach.call($baseToggle.querySelectorAll("button[data-base]"), function(b){
+      b.classList.toggle("active", b.getAttribute("data-base") === state.base);
+    });
+    $basePill.style.transform = "translateX(" + (state.base === "eur" ? 100 : 0) + "%)";
+  }
 
   // ---------- editing ----------
   function setActive(field){
@@ -477,7 +574,7 @@
     var btn = e.target.closest(".key"); if(!btn) return;
     ripple(btn, e); haptic(8); press(btn.getAttribute("data-k"));
   });
-  el("quick").addEventListener("pointerdown", function(e){
+  $quick.addEventListener("pointerdown", function(e){
     var btn = e.target.closest("button"); if(!btn) return;
     haptic(8);
     if(btn.hasAttribute("data-clear")) clearAll();
@@ -486,11 +583,21 @@
   $clear.addEventListener("click", function(e){ e.stopPropagation(); haptic(10); clearAll(); });
 
   // tap a card to make it the input
-  ["card-ars","card-usd","card-eur"].forEach(function(id){
-    var node = el(id);
+  [$main, RC[0].node, RC[1].node].forEach(function(node){
     var pick = function(e){ if(e.target.closest("#clearBtn")) return; setActive(node.getAttribute("data-field")); };
     node.addEventListener("click", pick);
     node.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); pick(e); } });
+  });
+
+  $baseToggle.addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-base]"); if(!btn) return;
+    var b = btn.getAttribute("data-base");
+    if(b === state.base) return;
+    state.base = b;
+    try{ localStorage.setItem(BASE_KEY, b); }catch(err){}
+    haptic(8);
+    applyBase();
+    setActive(b);   // se conserva el monto; el teclado pasa a editar la nueva base
   });
 
   window.addEventListener("keydown", function(e){
@@ -558,7 +665,10 @@
   })();
 
   // ---------- init ----------
+  try{ if(localStorage.getItem(BASE_KEY) === "eur") state.base = "eur"; }catch(e){}
+  state.active = state.base;
   applyTheme();
+  applyBase();
   movePill();
   if(loadCache() && state.rates.ts) setStatus("ok","Última cotización · " + timeLabel(state.rates.ts));
   render();
