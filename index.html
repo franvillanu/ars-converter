@@ -41,6 +41,10 @@
     --ars:#2f7ec0;
     --ars-tint:rgba(47,126,192,0.10);
 
+    /* pastilla del selector: siempre mas clara que su pista, con anillo celeste */
+    --pill:#ffffff;
+    --pill-ring:rgba(47,126,192,0.32);
+
     --shadow-sm:0 1px 2px rgba(11,30,56,.06), 0 2px 6px rgba(11,30,56,.06);
     --shadow-md:0 6px 18px rgba(11,30,56,.10), 0 2px 6px rgba(11,30,56,.06);
     --shadow-lg:0 18px 42px rgba(11,30,56,.18), 0 6px 14px rgba(11,30,56,.10);
@@ -61,6 +65,7 @@
     --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:var(--celeste-soft);
     --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#8ea0ff; --eur-tint:rgba(142,160,255,0.14);
     --ars:#9ec9ee; --ars-tint:rgba(158,201,238,0.13);
+    --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   } }
   :root[data-theme="dark"]{
@@ -70,6 +75,7 @@
     --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:var(--celeste-soft);
     --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#8ea0ff; --eur-tint:rgba(142,160,255,0.14);
     --ars:#9ec9ee; --ars-tint:rgba(158,201,238,0.13);
+    --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   }
 
@@ -118,8 +124,8 @@
   /* base-currency toggle: $ / € */
   .base-toggle{position:relative;display:grid;grid-template-columns:1fr 1fr;height:40px;padding:4px;
     background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;box-shadow:var(--shadow-sm);}
-  .base-toggle .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);background:var(--surface);
-    border-radius:999px;box-shadow:var(--shadow-sm);transition:transform .3s var(--ease);z-index:0;}
+  .base-toggle .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);background:var(--pill);
+    border-radius:999px;box-shadow:var(--shadow-sm), inset 0 0 0 1px var(--pill-ring);transition:transform .3s var(--ease);z-index:0;}
   .base-toggle button{position:relative;z-index:1;width:38px;border:none;background:none;border-radius:999px;
     font-size:1.02rem;font-weight:800;line-height:1;color:var(--ink-3);cursor:pointer;transition:color .2s ease;}
   .base-toggle button.active{color:var(--accent-strong);}
@@ -160,9 +166,10 @@
 
   /* ---------- segmented control ---------- */
   .seg{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:12px 3px 0;background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;padding:4px;box-shadow:var(--shadow-sm);}
-  .seg .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(25% - 3px);background:var(--surface);border-radius:999px;box-shadow:var(--shadow-sm);transition:transform .32s var(--ease);z-index:0;}
+  .seg .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(25% - 3px);background:var(--pill);border-radius:999px;
+    box-shadow:var(--shadow-sm), inset 0 0 0 1px var(--pill-ring);transition:transform .32s var(--ease);z-index:0;}
   .seg button{position:relative;z-index:1;border:none;background:none;padding:7px 0;font-size:.79rem;font-weight:700;color:var(--ink-3);cursor:pointer;border-radius:999px;transition:color .2s ease;white-space:nowrap;}
-  .seg button.active{color:var(--accent-strong);}
+  .seg button.active{color:var(--accent-strong);font-weight:800;}
 
   /* ---------- results ---------- */
   .results{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:12px;}
