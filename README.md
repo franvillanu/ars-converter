@@ -29,7 +29,9 @@ keypad and watch the equivalents update live. Convert **from pesos** (default,
   longer rate or a wrapped note never reflows the page while you type or switch
   markets. Heights use `svh`, not `dvh`, so iOS collapsing its address bar
   cannot move the layout either; the UI is compacted on short screens so it
-  fits without scrolling at all (down to the iPhone SE).
+  fits without scrolling at all (down to the iPhone SE). The keypad stretches
+  to fill whatever is left over, so there is no dead space in the middle and
+  the slack lands in bigger keys instead.
 - Live rates from [dolarapi.com](https://dolarapi.com); last value cached in
   `localStorage` so it still works offline. Auto-refreshes on focus and every 90s.
 - Adaptive **light / dark** theme, `prefers-reduced-motion` support, safe-area aware.
