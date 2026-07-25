@@ -41,6 +41,10 @@
     --ars:#2f7ec0;
     --ars-tint:rgba(47,126,192,0.10);
 
+    /* pastilla del selector: siempre mas clara que su pista, con anillo celeste */
+    --pill:#ffffff;
+    --pill-ring:rgba(47,126,192,0.32);
+
     --shadow-sm:0 1px 2px rgba(11,30,56,.06), 0 2px 6px rgba(11,30,56,.06);
     --shadow-md:0 6px 18px rgba(11,30,56,.10), 0 2px 6px rgba(11,30,56,.06);
     --shadow-lg:0 18px 42px rgba(11,30,56,.18), 0 6px 14px rgba(11,30,56,.10);
@@ -50,6 +54,8 @@
     --r-sm:14px;
     --ease:cubic-bezier(.22,.61,.36,1);
     --pop:cubic-bezier(.34,1.56,.64,1);
+
+    --amt:3;          /* tamaño base del monto, en rem — lo lee fitFont() */
   }
 
   @media (prefers-color-scheme: dark){ :root:not([data-theme]){
@@ -59,6 +65,7 @@
     --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:var(--celeste-soft);
     --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#8ea0ff; --eur-tint:rgba(142,160,255,0.14);
     --ars:#9ec9ee; --ars-tint:rgba(158,201,238,0.13);
+    --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   } }
   :root[data-theme="dark"]{
@@ -68,6 +75,7 @@
     --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:var(--celeste-soft);
     --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#8ea0ff; --eur-tint:rgba(142,160,255,0.14);
     --ars:#9ec9ee; --ars-tint:rgba(158,201,238,0.13);
+    --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   }
 
@@ -77,8 +85,13 @@
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--ink);
     background:var(--bg);
-    min-height:100dvh;
+    /* svh = "small viewport height": el alto con la barra de Safari desplegada.
+       A diferencia de dvh, NO cambia cuando iOS colapsa/expande la barra al
+       arrastrar, así que el layout no se reacomoda al mover el dedo. */
+    min-height:100vh;            /* fallback navegadores viejos */
+    min-height:100svh;
     overflow-x:hidden;
+    overscroll-behavior-y:none;  /* sin rebote elástico que dispare la barra */
     -webkit-font-smoothing:antialiased;
     touch-action:pan-y;
     -webkit-user-select:none;user-select:none;
@@ -86,7 +99,8 @@
   }
   .app{
     position:relative;
-    min-height:100dvh;
+    min-height:100vh;
+    min-height:100svh;
     max-width:460px;
     margin:0 auto;
     display:flex;
@@ -110,8 +124,8 @@
   /* base-currency toggle: $ / € */
   .base-toggle{position:relative;display:grid;grid-template-columns:1fr 1fr;height:40px;padding:4px;
     background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;box-shadow:var(--shadow-sm);}
-  .base-toggle .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);background:var(--surface);
-    border-radius:999px;box-shadow:var(--shadow-sm);transition:transform .3s var(--ease);z-index:0;}
+  .base-toggle .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);background:var(--pill);
+    border-radius:999px;box-shadow:var(--shadow-sm), inset 0 0 0 1px var(--pill-ring);transition:transform .3s var(--ease);z-index:0;}
   .base-toggle button{position:relative;z-index:1;width:38px;border:none;background:none;border-radius:999px;
     font-size:1.02rem;font-weight:800;line-height:1;color:var(--ink-3);cursor:pointer;transition:color .2s ease;}
   .base-toggle button.active{color:var(--accent-strong);}
@@ -152,9 +166,10 @@
 
   /* ---------- segmented control ---------- */
   .seg{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:12px 3px 0;background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;padding:4px;box-shadow:var(--shadow-sm);}
-  .seg .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(25% - 3px);background:var(--surface);border-radius:999px;box-shadow:var(--shadow-sm);transition:transform .32s var(--ease);z-index:0;}
+  .seg .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(25% - 3px);background:var(--pill);border-radius:999px;
+    box-shadow:var(--shadow-sm), inset 0 0 0 1px var(--pill-ring);transition:transform .32s var(--ease);z-index:0;}
   .seg button{position:relative;z-index:1;border:none;background:none;padding:7px 0;font-size:.79rem;font-weight:700;color:var(--ink-3);cursor:pointer;border-radius:999px;transition:color .2s ease;white-space:nowrap;}
-  .seg button.active{color:var(--accent-strong);}
+  .seg button.active{color:var(--accent-strong);font-weight:800;}
 
   /* ---------- results ---------- */
   .results{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:12px;}
@@ -201,13 +216,54 @@
   .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
   .key{position:relative;overflow:hidden;border:1px solid var(--stroke);background:var(--surface-key);border-radius:var(--r-sm);box-shadow:var(--shadow-sm);
     font-size:1.45rem;font-weight:700;color:var(--ink);cursor:pointer;
-    min-height:clamp(44px,6.3vh,58px);display:flex;align-items:center;justify-content:center;
+    min-height:clamp(42px,6.3svh,58px);display:flex;align-items:center;justify-content:center;
     transition:transform .1s var(--pop);font-variant-numeric:tabular-nums;touch-action:manipulation;user-select:none;}
   .key:active{transform:scale(.95);}
   .key.util{color:var(--ink-2);font-size:1.2rem;}
   .key svg{width:24px;height:24px;}
   .key .ripple{position:absolute;border-radius:50%;background:var(--celeste);opacity:.28;transform:translate(-50%,-50%) scale(0);pointer-events:none;animation:ripple .45s var(--ease) forwards;}
   @keyframes ripple{to{transform:translate(-50%,-50%) scale(1);opacity:0;}}
+
+  /* Pantallas cortas (SE, minis): comprime lo justo para que todo entre sin
+     scroll.  Si la página no scrollea, iOS nunca colapsa su barra y no hay salto.
+     El umbral va sobre el viewport grande, que es contra el que iOS evalúa las
+     media queries de alto. */
+  @media (max-height:740px){
+    .app{padding-top:calc(env(safe-area-inset-top) + 4px);}
+    .topbar{margin-bottom:7px;min-height:36px;}
+    .icon-btn{width:36px;height:36px;}
+    .base-toggle{height:36px;}
+    .amount-card{padding:9px 16px 10px;}
+    .amount-row{min-height:46px;}
+    .seg{margin-top:9px;}
+    .results{margin-top:9px;gap:9px;}
+    .rc{padding:10px 12px 9px;}
+    .keypad-wrap{padding-top:6px;}
+    .quick{gap:6px;margin-bottom:6px;}
+    .quick button{padding:6px 0;}
+    .keypad{gap:6px;}
+    .status{margin-top:8px;}
+  }
+
+  /* Pantallas muy cortas (iPhone SE): segundo nivel, para que tampoco scrollee. */
+  @media (max-height:700px){
+    :root{--amt:2.4;}
+    .app{padding-bottom:calc(env(safe-area-inset-bottom) + 8px);}
+    .topbar{min-height:34px;margin-bottom:6px;}
+    .seg{margin-top:8px;}
+    .results{margin-top:8px;}
+    .quick{gap:5px;margin-bottom:5px;}
+    .keypad{gap:5px;}
+    .keypad-wrap{padding-top:4px;}
+    .amount-card{padding:8px 14px 9px;}
+    .amount-row{min-height:38px;}
+    .amount-row .sym{font-size:1.45rem;}
+    .seg button{padding:6px 0;}
+    .rc{padding:9px 11px 8px;}
+    .quick button{padding:5px 0;font-size:.76rem;}
+    .key{min-height:clamp(38px,6.3svh,52px);font-size:1.32rem;}
+    .status{margin-top:5px;}
+  }
 
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
@@ -321,6 +377,8 @@
   var LS_KEY = "pesos_rates_v2";
   var THEME_KEY = "pesos_theme";
   var BASE_KEY = "pesos_base";     // moneda de partida: "ars" (default) | "eur"
+  var RATE_KEY = "pesos_rate";     // mercado elegido: "takenos" (default) | blue | oficial | tarjeta
+  var RATE_TYPES = ["takenos","blue","oficial","tarjeta"];
 
   var CUR = {
     ars:{ code:"ARS", sym:"$",   name:"Pesos argentinos", full:"Peso argentino",       flag:"🇦🇷" },
@@ -443,7 +501,8 @@
       $node.style.fontSize = (s < minRem ? minRem : s) + "rem";
     }
   }
-  function fitFont(){ autofit($disp, 3, 1.3); }
+  var AMT_BASE = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--amt")) || 3;
+  function fitFont(){ autofit($disp, AMT_BASE, 1.3); }
 
   function renderMain(){
     var f = state.base;
@@ -640,13 +699,16 @@
 
   // ---------- segmented control ----------
   function movePill(){
-    var idx = ["takenos","blue","oficial","tarjeta"].indexOf(state.rateType);
+    var idx = RATE_TYPES.indexOf(state.rateType);
     $segPill.style.transform = "translateX(" + (idx*100) + "%)";
+    Array.prototype.forEach.call($seg.querySelectorAll("button[data-rate]"), function(b){
+      b.classList.toggle("active", b.getAttribute("data-rate") === state.rateType);
+    });
   }
   $seg.addEventListener("click", function(e){
     var btn = e.target.closest("button[data-rate]"); if(!btn) return;
     state.rateType = btn.getAttribute("data-rate");
-    Array.prototype.forEach.call($seg.querySelectorAll("button"), function(b){ b.classList.toggle("active", b === btn); });
+    try{ localStorage.setItem(RATE_KEY, state.rateType); }catch(err){}
     haptic(6); movePill();
     if(state.active !== "ars") recomputeBase();  // same foreign amount, new market → new pesos
     render();
@@ -665,7 +727,11 @@
   })();
 
   // ---------- init ----------
-  try{ if(localStorage.getItem(BASE_KEY) === "eur") state.base = "eur"; }catch(e){}
+  try{
+    if(localStorage.getItem(BASE_KEY) === "eur") state.base = "eur";
+    var savedRate = localStorage.getItem(RATE_KEY);
+    if(RATE_TYPES.indexOf(savedRate) !== -1) state.rateType = savedRate;
+  }catch(e){}
   state.active = state.base;
   applyTheme();
   applyBase();

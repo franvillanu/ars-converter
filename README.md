@@ -13,7 +13,8 @@ keypad and watch the equivalents update live. Convert **from pesos** (default,
   are typing (`+1K / +5K / +10K` for pesos, `+10 / +50 / +100` for USD / EUR).
 - **Base-currency toggle (`$` / `€`)** next to the theme button — picks which
   currency the big card holds; the choice persists in `localStorage`
-  (`pesos_base`, default `ars`).
+  (`pesos_base`, default `ars`). The selected market persists too
+  (`pesos_rate`, default `takenos`).
 - **Edit any field** — tap ARS, USD, or EUR to make it the input; the other two
   convert automatically (enter dollars → see pesos, etc.).
 - Markets in a sliding segmented control: **Takenos · Blue · Oficial · Tarjeta**.
@@ -26,7 +27,9 @@ keypad and watch the equivalents update live. Convert **from pesos** (default,
   (persists, else follows system), pinch/double-tap zoom disabled.
 - **Jump-free layout** — every text row in the result cards has a fixed box, so a
   longer rate or a wrapped note never reflows the page while you type or switch
-  markets.
+  markets. Heights use `svh`, not `dvh`, so iOS collapsing its address bar
+  cannot move the layout either; the UI is compacted on short screens so it
+  fits without scrolling at all (down to the iPhone SE).
 - Live rates from [dolarapi.com](https://dolarapi.com); last value cached in
   `localStorage` so it still works offline. Auto-refreshes on focus and every 90s.
 - Adaptive **light / dark** theme, `prefers-reduced-motion` support, safe-area aware.
