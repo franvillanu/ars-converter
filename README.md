@@ -23,6 +23,9 @@ keypad and watch the equivalents update live. Convert **from pesos** (default,
   single observed transaction, so it's labelled as an estimate in the UI.
 - Buy/sell spread and last-updated time per rate. EUR tracks the selected market
   (scaled off the official euro; estimates flagged with `*`).
+- **No load flash** — transitions are suppressed until the first frame, so the
+  restored market/currency pills are already in place instead of sliding over
+  from the defaults, and the theme colours do not fade in.
 - Auto-fitting amounts (scale to fit any screen width), sun/moon **theme toggle**
   (persists, else follows system), pinch/double-tap zoom disabled.
 - **Jump-free layout** — every text row in the result cards has a fixed box, so a
