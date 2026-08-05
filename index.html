@@ -141,6 +141,45 @@
      entran con un fundido. */
   .no-anim, .no-anim *{transition:none !important;}
 
+  /* ---------- historial ---------- */
+  .sheet-back{position:fixed;inset:0;z-index:8;background:rgba(6,20,34,.42);backdrop-filter:blur(2px);
+    opacity:0;transition:opacity .24s var(--ease);}
+  .sheet-back.open{opacity:1;}
+  .sheet-back[hidden]{display:none;}
+
+  .sheet{
+    position:fixed;left:50%;bottom:0;z-index:9;width:100%;max-width:460px;
+    transform:translate(-50%,100%);
+    background:var(--surface);border:1px solid var(--stroke);border-bottom:none;
+    border-radius:var(--r-lg) var(--r-lg) 0 0;box-shadow:var(--shadow-lg);
+    padding:8px 16px calc(env(safe-area-inset-bottom) + 14px);
+    max-height:min(72svh,560px);display:flex;flex-direction:column;
+    transition:transform .3s var(--ease);
+  }
+  .sheet.open{transform:translate(-50%,0);}
+  .sheet[hidden]{display:none;}
+  .sheet .grab{width:38px;height:4px;border-radius:999px;background:var(--stroke-strong);margin:0 auto 10px;flex:none;}
+  .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex:none;}
+  .sheet-head h2{font-size:.7rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);}
+  .sheet-head button{border:none;background:none;font-size:.72rem;font-weight:700;color:var(--accent-strong);
+    cursor:pointer;padding:5px 2px;font-family:inherit;}
+  .sheet-head button[hidden]{display:none;}
+
+  .hist-list{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:0 -4px;padding:0 4px;}
+  .hist-empty{text-align:center;color:var(--ink-3);font-size:.76rem;padding:26px 10px 30px;line-height:1.5;}
+
+  .hist-item{width:100%;display:block;text-align:left;font-family:inherit;cursor:pointer;
+    border:none;border-top:1px solid var(--stroke);background:none;padding:9px 2px;
+    transition:background .18s ease;border-radius:10px;}
+  .hist-item:first-child{border-top:none;}
+  .hist-item:active{background:var(--surface-2);}
+  .hist-line{display:flex;align-items:baseline;gap:7px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .hist-from{font-size:.95rem;font-weight:800;color:var(--ink);flex:none;}
+  .hist-arrow{font-size:.8rem;color:var(--ink-3);flex:none;}
+  .hist-to{font-size:.86rem;font-weight:700;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;}
+  .hist-to .sep{color:var(--ink-3);font-weight:600;margin:0 5px;}
+  .hist-meta{margin-top:2px;font-size:.6rem;font-weight:600;color:var(--ink-3);letter-spacing:.01em;}
+
   /* ---------- editable field: shared ---------- */
   .field{cursor:pointer;transition:box-shadow .2s var(--ease),border-color .2s ease;}
   .field.active{border-color:transparent;}
@@ -291,6 +330,9 @@
         <button type="button" data-base="eur" aria-label="Convertir desde euros">€</button>
       </div>
       <button id="themeBtn" class="icon-btn" aria-label="Cambiar tema (claro/oscuro)"></button>
+      <button id="histBtn" class="icon-btn" aria-label="Ver historial de conversiones" aria-haspopup="dialog" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 12a8.8 8.8 0 1 0 2.6-6.2"/><path d="M3 4.4V9h4.6"/><path d="M12 7.7V12l3 1.8"/></svg>
+      </button>
     </div>
 
     <section class="amount-card field active" id="card-main" data-field="ars" role="button" tabindex="0" aria-label="Editar monto en pesos argentinos">
@@ -364,6 +406,16 @@
         </button>
       </div>
     </div>
+
+    <div class="sheet-back" id="histBack" hidden></div>
+    <aside class="sheet" id="histSheet" hidden role="dialog" aria-modal="true" aria-label="Historial de conversiones">
+      <span class="grab"></span>
+      <div class="sheet-head">
+        <h2>Historial</h2>
+        <button type="button" id="histClear" hidden>Borrar</button>
+      </div>
+      <div class="hist-list" id="histList"></div>
+    </aside>
 
     <div class="status loading" id="status">
       <span class="dot"></span>
@@ -616,6 +668,7 @@
       haptic(6);
     }
     render();
+    scheduleRecord();
   }
   function press(k){
     if(k === "back"){ state.raw = state.raw.slice(0,-1); }
@@ -628,10 +681,10 @@
       else if(state.raw.replace(/[^0-9]/g,"").length >= 15) return;
       else state.raw += k;
     }
-    recomputeBase(); render();
+    recomputeBase(); render(); scheduleRecord();
   }
-  function quickAdd(n){ state.raw = String(Math.floor(rawToNum(state.raw)) + n); recomputeBase(); render(); }
-  function clearAll(){ state.raw = ""; state.baseArs = 0; render(); }
+  function quickAdd(n){ state.raw = String(Math.floor(rawToNum(state.raw)) + n); recomputeBase(); render(); scheduleRecord(); }
+  function clearAll(){ clearTimeout(histTimer); state.raw = ""; state.baseArs = 0; render(); }
 
   function haptic(ms){ if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
   function ripple(btn, ev){
@@ -677,6 +730,7 @@
   });
 
   window.addEventListener("keydown", function(e){
+    if(histOpen()) return;   // con el historial abierto el teclado no edita
     if(e.key >= "0" && e.key <= "9") press(e.key);
     else if(e.key === "," || e.key === ".") press(",");
     else if(e.key === "Backspace") press("back");
@@ -729,6 +783,131 @@
     haptic(6); movePill();
     if(state.active !== "ars") recomputeBase();  // same foreign amount, new market → new pesos
     render();
+    scheduleRecord();
+  });
+
+  // ---------- historial ----------
+  // Se guarda la conversión "terminada": mientras se tipea no se anota nada, y una
+  // tanda de teclas seguidas colapsa en una sola línea (la última), así el listado
+  // muestra los montos que el usuario realmente miró y no cada dígito intermedio.
+  var HIST_KEY = "pesos_hist_v1";
+  var HIST_MAX = 25;
+  var HIST_SETTLE = 1300;   // ms sin tocar nada antes de anotar
+  var HIST_MERGE = 30000;   // ms dentro de los cuales se reemplaza la línea anterior
+  var hist = [];
+  var histTimer = null;
+  var $histBtn = el("histBtn"), $histSheet = el("histSheet"), $histBack = el("histBack"),
+      $histList = el("histList"), $histClear = el("histClear");
+
+  function loadHist(){
+    try{ var h = JSON.parse(localStorage.getItem(HIST_KEY)); if(h && h.length) hist = h.slice(0,HIST_MAX); }catch(e){}
+  }
+  function saveHist(){ try{ localStorage.setItem(HIST_KEY, JSON.stringify(hist)); }catch(e){} }
+
+  function capFirst(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+  // hora sola para lo de hoy; día y mes para lo de antes
+  function histTime(ts){
+    try{
+      var d = new Date(ts), n = new Date();
+      if(d.toDateString() === n.toDateString()) return timeLabel(ts);
+      return d.toLocaleDateString("es-AR",{day:"numeric",month:"short"}) + " · " + timeLabel(ts);
+    }catch(e){ return ""; }
+  }
+  function fmtAmount(field, v){
+    return CUR[field].sym + " " + (field === "ars" ? nfArs.format(v) : nfMoney.format(v));
+  }
+  function recordNow(){
+    var from = state.active, v = fieldNumeric(from);
+    if(!(v > 0)) return;
+    var others = ["ars","usd","eur"].filter(function(f){ return f !== from; });
+    var out = others.map(function(f){ return [f, fieldNumeric(f)]; });
+    if(out.some(function(o){ return !(o[1] > 0); })) return;   // sin cotización todavía
+
+    var entry = { ts:Date.now(), f:from, v:v, r:state.rateType, o:out };
+    var last = hist[0];
+    // misma moneda y mismo mercado, recién anotado → es la misma cuenta, se pisa
+    if(last && last.f === entry.f && last.r === entry.r &&
+       (last.v === entry.v || entry.ts - last.ts < HIST_MERGE)){
+      hist[0] = entry;
+    } else {
+      hist.unshift(entry);
+      if(hist.length > HIST_MAX) hist.length = HIST_MAX;
+    }
+    saveHist();
+    if(!$histSheet.hidden) renderHist();
+  }
+  function scheduleRecord(){
+    clearTimeout(histTimer);
+    histTimer = setTimeout(recordNow, HIST_SETTLE);
+  }
+
+  function renderHist(){
+    $histClear.hidden = hist.length === 0;
+    if(!hist.length){
+      $histList.innerHTML = '<p class="hist-empty">Todavía no hay conversiones.<br>Las cuentas que hagas van a quedar acá.</p>';
+      return;
+    }
+    $histList.innerHTML = hist.map(function(e, i){
+      var to = e.o.map(function(o){ return fmtAmount(o[0], o[1]); }).join('<span class="sep">·</span>');
+      return '<button type="button" class="hist-item" data-i="' + i + '">' +
+               '<span class="hist-line">' +
+                 '<span class="hist-from">' + fmtAmount(e.f, e.v) + '</span>' +
+                 '<span class="hist-arrow">→</span>' +
+                 '<span class="hist-to">' + to + '</span>' +
+               '</span>' +
+               '<span class="hist-meta">' + capFirst(labelFor(e.r)) + ' · ' + histTime(e.ts) + '</span>' +
+             '</button>';
+    }).join("");
+  }
+
+  function openHist(){
+    clearTimeout(histTimer); recordNow();   // lo tipeado recién entra sin esperar
+    renderHist();
+    $histBack.hidden = false; $histSheet.hidden = false;
+    $histBtn.setAttribute("aria-expanded","true");
+    requestAnimationFrame(function(){
+      $histBack.classList.add("open"); $histSheet.classList.add("open");
+    });
+  }
+  function closeHist(){
+    $histBack.classList.remove("open"); $histSheet.classList.remove("open");
+    $histBtn.setAttribute("aria-expanded","false");
+    setTimeout(function(){ $histBack.hidden = true; $histSheet.hidden = true; }, 260);
+  }
+  function histOpen(){ return !$histSheet.hidden; }
+
+  // tocar una línea vuelve a cargar esa cuenta (monto + mercado)
+  function restoreHist(e){
+    if(RATE_TYPES.indexOf(e.r) !== -1 && e.r !== state.rateType){
+      state.rateType = e.r;
+      try{ localStorage.setItem(RATE_KEY, e.r); }catch(err){}
+      movePill();
+    }
+    var b = (e.f === "usd") ? state.base : e.f;
+    if(b !== state.base){
+      state.base = b;
+      try{ localStorage.setItem(BASE_KEY, b); }catch(err){}
+      applyBase();
+    }
+    state.active = e.f;
+    state.raw = numToRaw(e.v);
+    recomputeBase();
+    render();
+  }
+
+  $histBtn.addEventListener("click", function(){ haptic(8); histOpen() ? closeHist() : openHist(); });
+  $histBack.addEventListener("click", closeHist);
+  $histClear.addEventListener("click", function(){
+    hist = []; saveHist(); renderHist(); haptic(10);
+  });
+  $histList.addEventListener("click", function(ev){
+    var btn = ev.target.closest(".hist-item"); if(!btn) return;
+    var e = hist[parseInt(btn.getAttribute("data-i"),10)];
+    if(!e) return;
+    haptic(8); restoreHist(e); closeHist();
+  });
+  window.addEventListener("keydown", function(ev){
+    if(ev.key === "Escape" && histOpen()) closeHist();
   });
 
   // ---------- block zoom gestures ----------
@@ -750,6 +929,7 @@
     if(RATE_TYPES.indexOf(savedRate) !== -1) state.rateType = savedRate;
   }catch(e){}
   state.active = state.base;
+  loadHist();
   applyTheme();
   applyBase();
   movePill();
