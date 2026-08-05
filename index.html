@@ -152,33 +152,45 @@
     transform:translate(-50%,100%);
     background:var(--surface);border:1px solid var(--stroke);border-bottom:none;
     border-radius:var(--r-lg) var(--r-lg) 0 0;box-shadow:var(--shadow-lg);
-    padding:8px 16px calc(env(safe-area-inset-bottom) + 14px);
+    padding:8px 16px calc(env(safe-area-inset-bottom) + 6px);
     max-height:min(72svh,560px);display:flex;flex-direction:column;
     transition:transform .3s var(--ease);
   }
   .sheet.open{transform:translate(-50%,0);}
   .sheet[hidden]{display:none;}
-  .sheet .grab{width:38px;height:4px;border-radius:999px;background:var(--stroke-strong);margin:0 auto 10px;flex:none;}
-  .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex:none;}
-  .sheet-head h2{font-size:.7rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);}
-  .sheet-head button{border:none;background:none;font-size:.72rem;font-weight:700;color:var(--accent-strong);
-    cursor:pointer;padding:5px 2px;font-family:inherit;}
+  .sheet .grab{width:38px;height:4px;border-radius:999px;background:var(--stroke-strong);margin:0 auto 9px;flex:none;}
+  .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;flex:none;}
+  .sheet-head h2{font-size:.74rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);}
+  .sheet-head button{border:none;background:none;font-size:.78rem;font-weight:700;color:var(--accent-strong);
+    cursor:pointer;padding:6px 2px;font-family:inherit;}
   .sheet-head button[hidden]{display:none;}
 
-  .hist-list{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:0 -4px;padding:0 4px;}
-  .hist-empty{text-align:center;color:var(--ink-3);font-size:.76rem;padding:26px 10px 30px;line-height:1.5;}
+  .hist-list{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:0 -4px;padding:0 4px 2px;}
+  .hist-empty{text-align:center;color:var(--ink-3);font-size:.8rem;padding:28px 12px 34px;line-height:1.55;}
 
-  .hist-item{width:100%;display:block;text-align:left;font-family:inherit;cursor:pointer;
-    border:none;border-top:1px solid var(--stroke);background:none;padding:9px 2px;
-    transition:background .18s ease;border-radius:10px;}
+  /* Cada línea usa los dos bordes: el monto tipeado a la izquierda, los
+     resultados alineados a la derecha.  Así la fila queda pareja aunque haya
+     una sola, y los números caen en columna cuando hay varias. */
+  .hist-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    text-align:left;font-family:inherit;cursor:pointer;
+    border:none;border-top:1px solid var(--stroke);background:none;padding:11px 4px;
+    transition:background .18s ease;border-radius:12px;}
   .hist-item:first-child{border-top:none;}
   .hist-item:active{background:var(--surface-2);}
-  .hist-line{display:flex;align-items:baseline;gap:7px;font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .hist-from{font-size:.95rem;font-weight:800;color:var(--ink);flex:none;}
-  .hist-arrow{font-size:.8rem;color:var(--ink-3);flex:none;}
-  .hist-to{font-size:.86rem;font-weight:700;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;}
-  .hist-to .sep{color:var(--ink-3);font-weight:600;margin:0 5px;}
-  .hist-meta{margin-top:2px;font-size:.6rem;font-weight:600;color:var(--ink-3);letter-spacing:.01em;}
+  .hist-l{min-width:0;display:flex;flex-direction:column;}
+  .hist-from{font-size:1.12rem;font-weight:800;color:var(--ink);letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hist-meta{margin-top:3px;font-size:.63rem;font-weight:600;color:var(--ink-3);letter-spacing:.02em;white-space:nowrap;}
+  .hist-r{flex:none;text-align:right;display:flex;flex-direction:column;gap:2px;}
+  .hist-to{font-size:.92rem;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.15;}
+  .hist-to .s{color:var(--ink-3);font-weight:600;font-size:.8em;margin-right:3px;}
+
+  /* al guardarse una cuenta nueva el botón hace un pulso: el usuario ve que quedó */
+  @keyframes histPing{
+    0%{box-shadow:var(--shadow-sm), 0 0 0 0 var(--pill-ring);}
+    100%{box-shadow:var(--shadow-sm), 0 0 0 12px transparent;}
+  }
+  .icon-btn.ping{animation:histPing .55s var(--ease);color:var(--accent-strong);}
 
   /* ---------- editable field: shared ---------- */
   .field{cursor:pointer;transition:box-shadow .2s var(--ease),border-color .2s ease;}
@@ -665,10 +677,12 @@
       var val = fieldNumeric(field);
       state.raw = val > 0 ? numToRaw(val) : "";
       state.active = field;
+      endSession();      // otra moneda = otra cuenta
       haptic(6);
     }
     render();
-    scheduleRecord();
+    // Cambiar de tarjeta no anota nada por sí solo: es la misma plata mirada del
+    // otro lado.  La línea nueva sale cuando efectivamente se tipea un monto.
   }
   function press(k){
     if(k === "back"){ state.raw = state.raw.slice(0,-1); }
@@ -681,10 +695,14 @@
       else if(state.raw.replace(/[^0-9]/g,"").length >= 15) return;
       else state.raw += k;
     }
-    recomputeBase(); render(); scheduleRecord();
+    recomputeBase(); render();
+    // Borrar no anota: el monto que el usuario miró es el de ANTES de borrar, y si
+    // lo deja vacío la cuenta se cierra — lo que tipee después es otra línea.
+    if(k === "back"){ if(state.raw === "") endSession(); else clearTimeout(histTimer); }
+    else scheduleRecord();
   }
   function quickAdd(n){ state.raw = String(Math.floor(rawToNum(state.raw)) + n); recomputeBase(); render(); scheduleRecord(); }
-  function clearAll(){ clearTimeout(histTimer); state.raw = ""; state.baseArs = 0; render(); }
+  function clearAll(){ endSession(); state.raw = ""; state.baseArs = 0; render(); }
 
   function haptic(ms){ if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
   function ripple(btn, ev){
@@ -739,7 +757,7 @@
 
   // ---------- fetch ----------
   function setStatus(kind, text){ $status.className = "status " + kind; $statusText.textContent = text; }
-  function timeLabel(ts){ try{ return new Date(ts).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } }
+  function timeLabel(ts){ try{ return new Date(ts).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",hour12:false}); }catch(e){ return ""; } }
   function saveCache(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state.rates)); }catch(e){} }
   function loadCache(){
     try{ var c = JSON.parse(localStorage.getItem(LS_KEY));
@@ -783,19 +801,26 @@
     haptic(6); movePill();
     if(state.active !== "ars") recomputeBase();  // same foreign amount, new market → new pesos
     render();
+    endSession();        // otro mercado = otro resultado = otra línea
     scheduleRecord();
   });
 
   // ---------- historial ----------
-  // Se guarda la conversión "terminada": mientras se tipea no se anota nada, y una
-  // tanda de teclas seguidas colapsa en una sola línea (la última), así el listado
-  // muestra los montos que el usuario realmente miró y no cada dígito intermedio.
+  // No hay tecla "=", así que la cuenta se da por hecha sola: después de ~1,2 s sin
+  // tocar nada se anota el monto que quedó en pantalla.  Mientras se sigue editando
+  // ESE mismo monto la línea se actualiza en el lugar (una cuenta, una línea).
+  //
+  // La cuenta se cierra —y la próxima abre línea nueva— cuando el usuario:
+  //   · borra el monto hasta dejarlo vacío (Borrar, o backspace hasta el final),
+  //   · toca otra tarjeta para tipear en otra moneda,
+  //   · cambia la moneda de partida o el mercado.
+  // Eso es el "=" implícito: empezar de cero es empezar otra cuenta.
   var HIST_KEY = "pesos_hist_v1";
   var HIST_MAX = 25;
-  var HIST_SETTLE = 1300;   // ms sin tocar nada antes de anotar
-  var HIST_MERGE = 30000;   // ms dentro de los cuales se reemplaza la línea anterior
+  var HIST_SETTLE = 1200;   // ms sin tocar nada antes de anotar
   var hist = [];
   var histTimer = null;
+  var histSession = null;   // id de la línea que se está editando; null = próxima es nueva
   var $histBtn = el("histBtn"), $histSheet = el("histSheet"), $histBack = el("histBack"),
       $histList = el("histList"), $histClear = el("histClear");
 
@@ -813,9 +838,8 @@
       return d.toLocaleDateString("es-AR",{day:"numeric",month:"short"}) + " · " + timeLabel(ts);
     }catch(e){ return ""; }
   }
-  function fmtAmount(field, v){
-    return CUR[field].sym + " " + (field === "ars" ? nfArs.format(v) : nfMoney.format(v));
-  }
+  function fmtNum(field, v){ return field === "ars" ? nfArs.format(v) : nfMoney.format(v); }
+  function fmtAmount(field, v){ return CUR[field].sym + " " + fmtNum(field, v); }
   function recordNow(){
     var from = state.active, v = fieldNumeric(from);
     if(!(v > 0)) return;
@@ -823,15 +847,20 @@
     var out = others.map(function(f){ return [f, fieldNumeric(f)]; });
     if(out.some(function(o){ return !(o[1] > 0); })) return;   // sin cotización todavía
 
-    var entry = { ts:Date.now(), f:from, v:v, r:state.rateType, o:out };
     var last = hist[0];
-    // misma moneda y mismo mercado, recién anotado → es la misma cuenta, se pisa
-    if(last && last.f === entry.f && last.r === entry.r &&
-       (last.v === entry.v || entry.ts - last.ts < HIST_MERGE)){
+    var entry = { id:Date.now(), ts:Date.now(), f:from, v:v, r:state.rateType, o:out };
+
+    if(last && histSession !== null && last.id === histSession){
+      entry.id = last.id;          // misma cuenta, se sigue editando → se pisa
       hist[0] = entry;
+    } else if(last && last.f === entry.f && last.r === entry.r && last.v === entry.v){
+      last.ts = entry.ts;          // idéntica a la de arriba: no duplica
+      histSession = last.id;
     } else {
       hist.unshift(entry);
       if(hist.length > HIST_MAX) hist.length = HIST_MAX;
+      histSession = entry.id;
+      pingHist();
     }
     saveHist();
     if(!$histSheet.hidden) renderHist();
@@ -839,6 +868,15 @@
   function scheduleRecord(){
     clearTimeout(histTimer);
     histTimer = setTimeout(recordNow, HIST_SETTLE);
+  }
+  // cierra la cuenta en curso: lo próximo que se tipee abre línea nueva
+  function endSession(){ clearTimeout(histTimer); histSession = null; }
+  function flushRecord(){ clearTimeout(histTimer); recordNow(); }
+  function pingHist(){
+    $histBtn.classList.remove("ping");
+    void $histBtn.offsetWidth;
+    $histBtn.classList.add("ping");
+    setTimeout(function(){ $histBtn.classList.remove("ping"); }, 600);
   }
 
   function renderHist(){
@@ -848,20 +886,21 @@
       return;
     }
     $histList.innerHTML = hist.map(function(e, i){
-      var to = e.o.map(function(o){ return fmtAmount(o[0], o[1]); }).join('<span class="sep">·</span>');
+      var to = e.o.map(function(o){
+        return '<span class="hist-to"><span class="s">' + CUR[o[0]].sym + '</span>' + fmtNum(o[0], o[1]) + '</span>';
+      }).join("");
       return '<button type="button" class="hist-item" data-i="' + i + '">' +
-               '<span class="hist-line">' +
+               '<span class="hist-l">' +
                  '<span class="hist-from">' + fmtAmount(e.f, e.v) + '</span>' +
-                 '<span class="hist-arrow">→</span>' +
-                 '<span class="hist-to">' + to + '</span>' +
+                 '<span class="hist-meta">' + capFirst(labelFor(e.r)) + ' · ' + histTime(e.ts) + '</span>' +
                '</span>' +
-               '<span class="hist-meta">' + capFirst(labelFor(e.r)) + ' · ' + histTime(e.ts) + '</span>' +
+               '<span class="hist-r">' + to + '</span>' +
              '</button>';
     }).join("");
   }
 
   function openHist(){
-    clearTimeout(histTimer); recordNow();   // lo tipeado recién entra sin esperar
+    flushRecord();   // lo que se acaba de tipear entra sin esperar
     renderHist();
     $histBack.hidden = false; $histSheet.hidden = false;
     $histBtn.setAttribute("aria-expanded","true");
@@ -893,6 +932,7 @@
     state.raw = numToRaw(e.v);
     recomputeBase();
     render();
+    endSession();   // si lo edita, es una cuenta nueva
   }
 
   $histBtn.addEventListener("click", function(){ haptic(8); histOpen() ? closeHist() : openHist(); });
@@ -937,7 +977,10 @@
   render();
   enableAnim();
   refresh();
-  document.addEventListener("visibilitychange", function(){ if(!document.hidden) refresh(); });
+  document.addEventListener("visibilitychange", function(){
+    if(document.hidden) flushRecord();   // salir de la app también cierra la cuenta
+    else refresh();
+  });
   window.addEventListener("resize", render);   // re-fit on rotation / width change
   setInterval(function(){ if(!document.hidden) refresh(); }, 90000);
 })();
