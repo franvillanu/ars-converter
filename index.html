@@ -219,7 +219,9 @@
   .hi-amt{display:flex;align-items:baseline;gap:7px;min-width:0;}
   .hi-amt b{font-size:1.32rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);
     font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .hi-amt i{flex:none;font-style:normal;font-size:.63rem;font-weight:800;letter-spacing:.05em;color:var(--ink-3);}
+  /* el código va del color de su moneda (ARS celeste, USD verde, EUR violeta),
+     no en gris: es la etiqueta que identifica de qué partió la cuenta */
+  .hi-amt i{flex:none;font-style:normal;font-size:.63rem;font-weight:800;letter-spacing:.05em;color:var(--accentc);}
 
   .hi-out{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:9px;padding-top:9px;
     border-top:1px dashed var(--stroke-strong);}
@@ -256,6 +258,14 @@
   .cur-dot.ars{background:radial-gradient(circle at 35% 30%, var(--gold-soft), var(--gold));box-shadow:0 0 0 3px rgba(246,180,14,.18);}
   .cur-dot.eur{background:radial-gradient(circle at 35% 30%, var(--celeste-soft), var(--eur));box-shadow:0 0 0 3px var(--eur-tint);}
   .amount-head .badge{font-size:.64rem;font-weight:700;color:var(--accent-strong);background:var(--surface-2);border:1px solid var(--stroke);padding:3px 9px;border-radius:999px;}
+  /* La tarjeta grande toma el color de la moneda que se está tipeando — el
+     nombre, el código y el símbolo dejan de ser gris neutro. */
+  .amount-card[data-field="ars"]{--accentc:var(--ars);--accentt:var(--ars-tint);}
+  .amount-card[data-field="eur"]{--accentc:var(--eur);--accentt:var(--eur-tint);}
+  .amount-card[data-field="usd"]{--accentc:var(--usd);--accentt:var(--usd-tint);}
+  .amount-head .label{color:var(--accentc);}
+  .amount-head .badge{color:var(--accentc);background:var(--accentt);border-color:transparent;}
+  .amount-row .sym{color:var(--accentc);}
 
   .amount-row{display:flex;align-items:baseline;gap:6px;min-height:52px;}
   .amount-row .sym{font-size:1.7rem;font-weight:700;color:var(--ink-3);flex:none;}
