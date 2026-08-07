@@ -48,6 +48,9 @@
     --ars-tint:rgba(10,108,240,0.12);
     /* Mismo azul para texto chico: en claro rinde, en oscuro se aclara un paso. */
     --ars-ink:var(--ars);
+    /* Morado oficial de Takenos, tomado del ícono de la app.  Va igual en los
+       dos temas — es color de marca, no una variable del tema. */
+    --takenos:#663acd;
 
     /* pastilla del selector: siempre mas clara que su pista, con anillo celeste */
     --pill:#ffffff;
@@ -176,7 +179,7 @@
   .sheet-title{display:flex;align-items:baseline;gap:8px;min-width:0;}
   .sheet-title h2{font-size:1.06rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);}
   .sheet-count{font-size:.72rem;font-weight:700;color:var(--ink-3);font-variant-numeric:tabular-nums;
-    background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;padding:2px 8px;flex:none;}
+    background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;padding:3px 8px 1px;flex:none;}
   .sheet-head button{flex:none;border:1px solid var(--stroke);background:var(--surface-2);
     font-size:.76rem;font-weight:700;color:var(--ink-2);border-radius:999px;
     cursor:pointer;padding:7px 13px;font-family:inherit;font-feature-settings:inherit;
@@ -209,7 +212,7 @@
   .hist-item{width:100%;display:flex;flex-direction:column;align-items:stretch;text-align:left;font-family:inherit;cursor:pointer;
     position:relative;overflow:hidden;
     border:1px solid var(--stroke);background:var(--surface-2);border-radius:var(--r-md);
-    padding:11px 13px 12px 15px;
+    padding:9px 13px 12px 15px;
     transition:transform .12s var(--pop),background .2s ease,border-color .2s ease;}
   /* barra de color = moneda de partida, mismo idioma visual que las tarjetas */
   .hist-item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accentc);opacity:.85;}
@@ -218,10 +221,14 @@
   .hist-item.eur{--accentc:var(--eur);--inkc:var(--eur);}
   .hist-item:active{transform:scale(.985);background:var(--surface);border-color:var(--stroke-strong);}
 
-  .hi-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;}
+  .hi-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
   .hi-mkt{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-    color:var(--accent-strong);background:var(--ars-tint);border-radius:999px;padding:3px 8px;
+    color:var(--accent-strong);background:var(--ars-tint);border-radius:999px;padding:4px 8px 2px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* Takenos es una marca y no un mercado genérico: lleva su morado, y relleno
+     sólido con texto blanco para que se lea como insignia y no se confunda con
+     el violeta del EUR, que anda por el mismo tono. */
+  .hi-mkt.takenos{color:#fff;background:var(--takenos);}
   .hi-time{flex:none;font-size:.68rem;font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums;}
 
   .hi-amt{display:flex;align-items:baseline;gap:7px;min-width:0;}
@@ -266,7 +273,7 @@
   .cur-dot{width:14px;height:14px;border-radius:50%;flex:none;}
   .cur-dot.ars{background:radial-gradient(circle at 35% 30%, var(--gold-soft), var(--gold));box-shadow:0 0 0 3px rgba(246,180,14,.18);}
   .cur-dot.eur{background:radial-gradient(circle at 35% 30%, var(--celeste-soft), var(--eur));box-shadow:0 0 0 3px var(--eur-tint);}
-  .amount-head .badge{font-size:.64rem;font-weight:700;color:var(--accent-strong);background:var(--surface-2);border:1px solid var(--stroke);padding:3px 9px;border-radius:999px;}
+  .amount-head .badge{font-size:.64rem;font-weight:700;color:var(--accent-strong);background:var(--surface-2);border:1px solid var(--stroke);padding:4px 9px 2px;border-radius:999px;}
   /* La tarjeta grande toma el color de la moneda que se está tipeando — el
      nombre, el código y el símbolo dejan de ser gris neutro. */
   .amount-card[data-field="ars"]{--accentc:var(--ars);--accentt:var(--ars-tint);--inkc:var(--ars-ink);}
@@ -953,7 +960,7 @@
         '<button type="button" class="hist-item ' + e.f + '" data-i="' + i + '" ' +
           'aria-label="Volver a cargar ' + fmtAmount(e.f, e.v) + '">' +
           '<span class="hi-top">' +
-            '<span class="hi-mkt">' + capFirst(labelFor(e.r)) + '</span>' +
+            '<span class="hi-mkt' + (e.r === "takenos" ? " takenos" : "") + '">' + capFirst(labelFor(e.r)) + '</span>' +
             '<span class="hi-time">' + timeLabel(e.ts) + '</span>' +
           '</span>' +
           '<span class="hi-amt"><b>' + fmtAmount(e.f, e.v) + '</b><i>' + CUR[e.f].code + '</i></span>' +
