@@ -38,8 +38,10 @@
     --usd-tint:rgba(18,128,92,0.10);
     --eur:#3f57c9;
     --eur-tint:rgba(63,87,201,0.10);
-    --ars:#2f7ec0;
-    --ars-tint:rgba(47,126,192,0.10);
+    /* Azul eléctrico, no el celeste apagado de la bandera: sobre blanco el
+       #2f7ec0 se leía casi gris al lado del verde del USD. */
+    --ars:#0a6cf0;
+    --ars-tint:rgba(10,108,240,0.12);
 
     /* pastilla del selector: siempre mas clara que su pista, con anillo celeste */
     --pill:#ffffff;
@@ -70,7 +72,7 @@
     --stroke:rgba(255,255,255,0.07); --stroke-strong:rgba(255,255,255,0.13);
     --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:var(--celeste-soft);
     --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#8ea0ff; --eur-tint:rgba(142,160,255,0.14);
-    --ars:#9ec9ee; --ars-tint:rgba(158,201,238,0.13);
+    --ars:#4fb2ff; --ars-tint:rgba(79,178,255,0.16);
     --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   } }
@@ -80,7 +82,7 @@
     --stroke:rgba(255,255,255,0.07); --stroke-strong:rgba(255,255,255,0.13);
     --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:var(--celeste-soft);
     --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#8ea0ff; --eur-tint:rgba(142,160,255,0.14);
-    --ars:#9ec9ee; --ars-tint:rgba(158,201,238,0.13);
+    --ars:#4fb2ff; --ars-tint:rgba(79,178,255,0.16);
     --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   }
@@ -265,10 +267,9 @@
   .amount-card[data-field="usd"]{--accentc:var(--usd);--accentt:var(--usd-tint);}
   .amount-head .label{color:var(--accentc);}
   .amount-head .badge{color:var(--accentc);background:var(--accentt);border-color:transparent;}
-  .amount-row .sym{color:var(--accentc);}
 
   .amount-row{display:flex;align-items:baseline;gap:6px;min-height:52px;}
-  .amount-row .sym{font-size:1.7rem;font-weight:700;color:var(--ink-3);flex:none;}
+  .amount-row .sym{font-size:1.7rem;font-weight:700;color:var(--accentc);flex:none;}
   #amountDisplay{
     font-size:3rem;font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--ink);
     font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;flex:1;min-width:0;
