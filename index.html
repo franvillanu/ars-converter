@@ -48,6 +48,9 @@
     --ars-tint:rgba(10,108,240,0.12);
     /* Mismo azul para texto chico: en claro rinde, en oscuro se aclara un paso. */
     --ars-ink:var(--ars);
+    /* Morado oficial de Takenos, tomado del ícono de la app.  Va igual en los
+       dos temas — es color de marca, no una variable del tema. */
+    --takenos:#663acd;
 
     /* pastilla del selector: siempre mas clara que su pista, con anillo celeste */
     --pill:#ffffff;
@@ -222,6 +225,10 @@
   .hi-mkt{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
     color:var(--accent-strong);background:var(--ars-tint);border-radius:999px;padding:3px 8px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* Takenos es una marca y no un mercado genérico: lleva su morado, y relleno
+     sólido con texto blanco para que se lea como insignia y no se confunda con
+     el violeta del EUR, que anda por el mismo tono. */
+  .hi-mkt.takenos{color:#fff;background:var(--takenos);}
   .hi-time{flex:none;font-size:.68rem;font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums;}
 
   .hi-amt{display:flex;align-items:baseline;gap:7px;min-width:0;}
@@ -953,7 +960,7 @@
         '<button type="button" class="hist-item ' + e.f + '" data-i="' + i + '" ' +
           'aria-label="Volver a cargar ' + fmtAmount(e.f, e.v) + '">' +
           '<span class="hi-top">' +
-            '<span class="hi-mkt">' + capFirst(labelFor(e.r)) + '</span>' +
+            '<span class="hi-mkt' + (e.r === "takenos" ? " takenos" : "") + '">' + capFirst(labelFor(e.r)) + '</span>' +
             '<span class="hi-time">' + timeLabel(e.ts) + '</span>' +
           '</span>' +
           '<span class="hi-amt"><b>' + fmtAmount(e.f, e.v) + '</b><i>' + CUR[e.f].code + '</i></span>' +
