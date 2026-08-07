@@ -32,16 +32,22 @@
     --ink:#0c2338;
     --ink-2:#375068;
     --ink-3:#6f889c;
-    --accent-strong:var(--celeste-deep);
+    /* El acento de la app vive en la misma familia que el ARS: dos azules
+       casi iguales pero de distinta saturación era lo que se veía "raro". */
+    --accent-strong:var(--ars);
 
     --usd:#12805c;
     --usd-tint:rgba(18,128,92,0.10);
-    --eur:#3f57c9;
-    --eur-tint:rgba(63,87,201,0.10);
+    /* Violeta y no azul-violeta: con el ARS ya en azul eléctrico, el #3f57c9
+       quedaba a 16° de tono y las dos etiquetas chicas se confundían. */
+    --eur:#5a3fd0;
+    --eur-tint:rgba(90,63,208,0.10);
     /* Azul eléctrico, no el celeste apagado de la bandera: sobre blanco el
        #2f7ec0 se leía casi gris al lado del verde del USD. */
     --ars:#0a6cf0;
     --ars-tint:rgba(10,108,240,0.12);
+    /* Mismo azul para texto chico: en claro rinde, en oscuro se aclara un paso. */
+    --ars-ink:var(--ars);
 
     /* pastilla del selector: siempre mas clara que su pista, con anillo celeste */
     --pill:#ffffff;
@@ -70,9 +76,9 @@
     --bg:#081726; --bg-2:#040e19; --glow:rgba(47,126,192,.42);
     --surface:#0f2739; --surface-2:#122e43; --surface-key:#16344b;
     --stroke:rgba(255,255,255,0.07); --stroke-strong:rgba(255,255,255,0.13);
-    --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:var(--celeste-soft);
-    --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#8ea0ff; --eur-tint:rgba(142,160,255,0.14);
-    --ars:#2b7cff; --ars-tint:rgba(43,124,255,0.20);
+    --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:#7fb4ff;
+    --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#a98bff; --eur-tint:rgba(169,139,255,0.16);
+    --ars:#2b7cff; --ars-tint:rgba(43,124,255,0.20); --ars-ink:#63a6ff;
     --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   } }
@@ -80,9 +86,9 @@
     --bg:#081726; --bg-2:#040e19; --glow:rgba(47,126,192,.42);
     --surface:#0f2739; --surface-2:#122e43; --surface-key:#16344b;
     --stroke:rgba(255,255,255,0.07); --stroke-strong:rgba(255,255,255,0.13);
-    --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:var(--celeste-soft);
-    --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#8ea0ff; --eur-tint:rgba(142,160,255,0.14);
-    --ars:#2b7cff; --ars-tint:rgba(43,124,255,0.20);
+    --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:#7fb4ff;
+    --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#a98bff; --eur-tint:rgba(169,139,255,0.16);
+    --ars:#2b7cff; --ars-tint:rgba(43,124,255,0.20); --ars-ink:#63a6ff;
     --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   }
@@ -207,9 +213,9 @@
     transition:transform .12s var(--pop),background .2s ease,border-color .2s ease;}
   /* barra de color = moneda de partida, mismo idioma visual que las tarjetas */
   .hist-item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accentc);opacity:.85;}
-  .hist-item.ars{--accentc:var(--ars);}
-  .hist-item.usd{--accentc:var(--usd);}
-  .hist-item.eur{--accentc:var(--eur);}
+  .hist-item.ars{--accentc:var(--ars);--inkc:var(--ars-ink);}
+  .hist-item.usd{--accentc:var(--usd);--inkc:var(--usd);}
+  .hist-item.eur{--accentc:var(--eur);--inkc:var(--eur);}
   .hist-item:active{transform:scale(.985);background:var(--surface);border-color:var(--stroke-strong);}
 
   .hi-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;}
@@ -221,9 +227,10 @@
   .hi-amt{display:flex;align-items:baseline;gap:7px;min-width:0;}
   .hi-amt b{font-size:1.32rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);
     font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  /* el código va del color de su moneda (ARS celeste, USD verde, EUR violeta),
-     no en gris: es la etiqueta que identifica de qué partió la cuenta */
-  .hi-amt i{flex:none;font-style:normal;font-size:.63rem;font-weight:800;letter-spacing:.05em;color:var(--accentc);}
+  /* el código va del color de su moneda (ARS azul, USD verde, EUR violeta), no
+     en gris: es la etiqueta que identifica de qué partió la cuenta.  Usa --inkc
+     y no --accentc porque el texto chico pide un paso más claro que la barra. */
+  .hi-amt i{flex:none;font-style:normal;font-size:.63rem;font-weight:800;letter-spacing:.05em;color:var(--inkc);}
 
   .hi-out{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:9px;padding-top:9px;
     border-top:1px dashed var(--stroke-strong);}
@@ -231,7 +238,7 @@
   .hi-o em{font-style:normal;font-size:.58rem;font-weight:800;letter-spacing:.07em;color:var(--oc);}
   .hi-o.usd{--oc:var(--usd);}
   .hi-o.eur{--oc:var(--eur);}
-  .hi-o.ars{--oc:var(--ars);}
+  .hi-o.ars{--oc:var(--ars-ink);}
   .hi-o b{font-size:.92rem;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
@@ -262,10 +269,10 @@
   .amount-head .badge{font-size:.64rem;font-weight:700;color:var(--accent-strong);background:var(--surface-2);border:1px solid var(--stroke);padding:3px 9px;border-radius:999px;}
   /* La tarjeta grande toma el color de la moneda que se está tipeando — el
      nombre, el código y el símbolo dejan de ser gris neutro. */
-  .amount-card[data-field="ars"]{--accentc:var(--ars);--accentt:var(--ars-tint);}
-  .amount-card[data-field="eur"]{--accentc:var(--eur);--accentt:var(--eur-tint);}
-  .amount-card[data-field="usd"]{--accentc:var(--usd);--accentt:var(--usd-tint);}
-  .amount-head .label{color:var(--accentc);}
+  .amount-card[data-field="ars"]{--accentc:var(--ars);--accentt:var(--ars-tint);--inkc:var(--ars-ink);}
+  .amount-card[data-field="eur"]{--accentc:var(--eur);--accentt:var(--eur-tint);--inkc:var(--eur);}
+  .amount-card[data-field="usd"]{--accentc:var(--usd);--accentt:var(--usd-tint);--inkc:var(--usd);}
+  .amount-head .label{color:var(--inkc);}
   .amount-head .badge{color:var(--accentc);background:var(--accentt);border-color:transparent;}
 
   .amount-row{display:flex;align-items:baseline;gap:6px;min-height:52px;}
