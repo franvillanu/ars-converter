@@ -51,6 +51,8 @@
     /* Morado oficial de Takenos, tomado del ícono de la app.  Va igual en los
        dos temas — es color de marca, no una variable del tema. */
     --takenos:#663acd;
+    --takenos-ink:var(--takenos);
+    --takenos-ring:rgba(102,58,205,0.50);
 
     /* pastilla del selector: siempre mas clara que su pista, con anillo celeste */
     --pill:#ffffff;
@@ -82,7 +84,7 @@
     --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:#7fb4ff;
     --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#a98bff; --eur-tint:rgba(169,139,255,0.16);
     --ars:#2b7cff; --ars-tint:rgba(43,124,255,0.20); --ars-ink:#63a6ff;
-    --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30);
+    --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30); --takenos-ink:#c4b0ff; --takenos-ring:rgba(150,110,255,0.75);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   } }
   :root[data-theme="dark"]{
@@ -92,7 +94,7 @@
     --ink:#eaf3fc; --ink-2:#a9c1d6; --ink-3:#7a95ac; --accent-strong:#7fb4ff;
     --usd:#3fd39a; --usd-tint:rgba(63,211,154,0.12); --eur:#a98bff; --eur-tint:rgba(169,139,255,0.16);
     --ars:#2b7cff; --ars-tint:rgba(43,124,255,0.20); --ars-ink:#63a6ff;
-    --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30);
+    --pill:#1d4767; --pill-ring:rgba(158,201,238,0.30); --takenos-ink:#c4b0ff; --takenos-ring:rgba(150,110,255,0.75);
     --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 8px 22px rgba(0,0,0,.45); --shadow-lg:0 22px 50px rgba(0,0,0,.55);
   }
 
@@ -299,9 +301,13 @@
   /* ---------- segmented control ---------- */
   .seg{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:11px 3px 0;background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;padding:4px;box-shadow:var(--shadow-sm);}
   .seg .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(25% - 3px);background:var(--pill);border-radius:999px;
-    box-shadow:var(--shadow-sm), inset 0 0 0 1px var(--pill-ring);transition:transform .32s var(--ease);z-index:0;}
+    box-shadow:var(--shadow-sm), inset 0 0 0 1px var(--pill-ring);
+    transition:transform .32s var(--ease), box-shadow .25s ease;z-index:0;}
   .seg button{position:relative;z-index:1;border:none;background:none;padding:7px 0;font-size:.79rem;font-weight:700;color:var(--ink-3);cursor:pointer;border-radius:999px;transition:color .2s ease;white-space:nowrap;}
   .seg button.active{color:var(--accent-strong);font-weight:800;}
+  /* Takenos es marca: cuando está elegido, la pastilla lleva su anillo morado. */
+  .seg[data-rate="takenos"] .pill{box-shadow:var(--shadow-sm), inset 0 0 0 1.5px var(--takenos-ring);}
+  .seg[data-rate="takenos"] button.active{color:var(--takenos-ink);}
 
   /* ---------- results ---------- */
   .results{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:11px;}
@@ -859,6 +865,7 @@
   function movePill(){
     var idx = RATE_TYPES.indexOf(state.rateType);
     $segPill.style.transform = "translateX(" + (idx*100) + "%)";
+    $seg.setAttribute("data-rate", state.rateType);
     Array.prototype.forEach.call($seg.querySelectorAll("button[data-rate]"), function(b){
       b.classList.toggle("active", b.getAttribute("data-rate") === state.rateType);
     });
