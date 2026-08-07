@@ -151,34 +151,91 @@
     position:fixed;left:50%;bottom:0;z-index:9;width:100%;max-width:460px;
     transform:translate(-50%,100%);
     background:var(--surface);border:1px solid var(--stroke);border-bottom:none;
-    border-radius:var(--r-lg) var(--r-lg) 0 0;box-shadow:var(--shadow-lg);
-    padding:8px 16px calc(env(safe-area-inset-bottom) + 14px);
-    max-height:min(72svh,560px);display:flex;flex-direction:column;
-    transition:transform .3s var(--ease);
+    border-radius:26px 26px 0 0;box-shadow:var(--shadow-lg);
+    padding:0 0 calc(env(safe-area-inset-bottom) + 10px);
+    max-height:min(84svh,680px);display:flex;flex-direction:column;
+    transition:transform .34s var(--ease);
   }
   .sheet.open{transform:translate(-50%,0);}
   .sheet[hidden]{display:none;}
-  .sheet .grab{width:38px;height:4px;border-radius:999px;background:var(--stroke-strong);margin:0 auto 10px;flex:none;}
-  .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex:none;}
-  .sheet-head h2{font-size:.7rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);}
-  .sheet-head button{border:none;background:none;font-size:.72rem;font-weight:700;color:var(--accent-strong);
-    cursor:pointer;padding:5px 2px;font-family:inherit;}
+  /* Mientras el dedo arrastra la hoja no hay transición: sigue al dedo 1:1. */
+  .sheet.dragging{transition:none;}
+
+  /* Zona de agarre + título: se queda fija arriba y es el área de arrastre. */
+  .sheet-grip{flex:none;padding:9px 18px 0;touch-action:none;cursor:grab;}
+  .sheet .grab{display:block;width:40px;height:5px;border-radius:999px;background:var(--stroke-strong);margin:0 auto;}
+  .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0 11px;}
+  .sheet-title{display:flex;align-items:baseline;gap:8px;min-width:0;}
+  .sheet-title h2{font-size:1.06rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);}
+  .sheet-count{font-size:.72rem;font-weight:700;color:var(--ink-3);font-variant-numeric:tabular-nums;
+    background:var(--surface-2);border:1px solid var(--stroke);border-radius:999px;padding:2px 8px;flex:none;}
+  .sheet-head button{flex:none;border:1px solid var(--stroke);background:var(--surface-2);
+    font-size:.76rem;font-weight:700;color:var(--ink-2);border-radius:999px;
+    cursor:pointer;padding:7px 13px;font-family:inherit;font-feature-settings:inherit;
+    transition:transform .12s var(--pop),background .2s ease,color .2s ease,border-color .2s ease;}
+  .sheet-head button:active{transform:scale(.94);}
+  /* Segundo toque = confirmar.  Borrar es destructivo y no tiene undo. */
+  .sheet-head button.arm{color:#fff;background:#e0524f;border-color:#e0524f;}
   .sheet-head button[hidden]{display:none;}
 
-  .hist-list{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin:0 -4px;padding:0 4px;}
-  .hist-empty{text-align:center;color:var(--ink-3);font-size:.76rem;padding:26px 10px 30px;line-height:1.5;}
+  .hist-list{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    padding:2px 18px 6px;display:flex;flex-direction:column;gap:8px;}
+  /* degradado al pie: avisa que la lista sigue sin robar altura */
+  .sheet::after{content:"";position:absolute;left:1px;right:1px;bottom:calc(env(safe-area-inset-bottom) + 10px);
+    height:26px;pointer-events:none;border-radius:0 0 26px 26px;
+    background:linear-gradient(to top, var(--surface), transparent);}
 
-  .hist-item{width:100%;display:block;text-align:left;font-family:inherit;cursor:pointer;
-    border:none;border-top:1px solid var(--stroke);background:none;padding:9px 2px;
-    transition:background .18s ease;border-radius:10px;}
-  .hist-item:first-child{border-top:none;}
-  .hist-item:active{background:var(--surface-2);}
-  .hist-line{display:flex;align-items:baseline;gap:7px;font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .hist-from{font-size:.95rem;font-weight:800;color:var(--ink);flex:none;}
-  .hist-arrow{font-size:.8rem;color:var(--ink-3);flex:none;}
-  .hist-to{font-size:.86rem;font-weight:700;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;}
-  .hist-to .sep{color:var(--ink-3);font-weight:600;margin:0 5px;}
-  .hist-meta{margin-top:2px;font-size:.6rem;font-weight:600;color:var(--ink-3);letter-spacing:.01em;}
+  .hist-empty{text-align:center;color:var(--ink-3);padding:30px 16px 40px;}
+  .hist-empty svg{width:38px;height:38px;stroke:var(--ink-3);opacity:.45;margin-bottom:12px;}
+  .hist-empty strong{display:block;font-size:.94rem;font-weight:700;color:var(--ink-2);margin-bottom:5px;}
+  .hist-empty span{font-size:.79rem;line-height:1.45;}
+
+  /* flex:none en la lista — si no, el contenedor scrolleable achica las tarjetas. */
+  .hist-list > *{flex:none;}
+  .hist-day{font-size:.63rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+    padding:9px 2px 1px;}
+  .hist-day:first-child{padding-top:2px;}
+
+  /* flex y no block: en un <button> el contenido va en una caja anónima que no
+     estira la altura, y las líneas de abajo quedarían recortadas. */
+  .hist-item{width:100%;display:flex;flex-direction:column;align-items:stretch;text-align:left;font-family:inherit;cursor:pointer;
+    position:relative;overflow:hidden;
+    border:1px solid var(--stroke);background:var(--surface-2);border-radius:var(--r-md);
+    padding:11px 13px 12px 15px;
+    transition:transform .12s var(--pop),background .2s ease,border-color .2s ease;}
+  /* barra de color = moneda de partida, mismo idioma visual que las tarjetas */
+  .hist-item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accentc);opacity:.85;}
+  .hist-item.ars{--accentc:var(--ars);}
+  .hist-item.usd{--accentc:var(--usd);}
+  .hist-item.eur{--accentc:var(--eur);}
+  .hist-item:active{transform:scale(.985);background:var(--surface);border-color:var(--stroke-strong);}
+
+  .hi-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;}
+  .hi-mkt{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--accent-strong);background:var(--ars-tint);border-radius:999px;padding:3px 8px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hi-time{flex:none;font-size:.68rem;font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums;}
+
+  .hi-amt{display:flex;align-items:baseline;gap:7px;min-width:0;}
+  .hi-amt b{font-size:1.32rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);
+    font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hi-amt i{flex:none;font-style:normal;font-size:.63rem;font-weight:800;letter-spacing:.05em;color:var(--ink-3);}
+
+  .hi-out{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:9px;padding-top:9px;
+    border-top:1px dashed var(--stroke-strong);}
+  .hi-o{min-width:0;display:flex;flex-direction:column;gap:2px;}
+  .hi-o em{font-style:normal;font-size:.58rem;font-weight:800;letter-spacing:.07em;color:var(--oc);}
+  .hi-o.usd{--oc:var(--usd);}
+  .hi-o.eur{--oc:var(--eur);}
+  .hi-o.ars{--oc:var(--ars);}
+  .hi-o b{font-size:.92rem;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  @media (max-height:640px){
+    .sheet{max-height:88svh;}
+    .hist-item{padding:9px 12px 10px 14px;}
+    .hi-amt b{font-size:1.2rem;}
+  }
 
   /* ---------- editable field: shared ---------- */
   .field{cursor:pointer;transition:box-shadow .2s var(--ease),border-color .2s ease;}
@@ -409,10 +466,15 @@
 
     <div class="sheet-back" id="histBack" hidden></div>
     <aside class="sheet" id="histSheet" hidden role="dialog" aria-modal="true" aria-label="Historial de conversiones">
-      <span class="grab"></span>
-      <div class="sheet-head">
-        <h2>Historial</h2>
-        <button type="button" id="histClear" hidden>Borrar</button>
+      <div class="sheet-grip" id="histGrip">
+        <span class="grab"></span>
+        <div class="sheet-head">
+          <div class="sheet-title">
+            <h2>Historial</h2>
+            <span class="sheet-count" id="histCount" hidden></span>
+          </div>
+          <button type="button" id="histClear" hidden>Borrar</button>
+        </div>
       </div>
       <div class="hist-list" id="histList"></div>
     </aside>
@@ -797,7 +859,8 @@
   var hist = [];
   var histTimer = null;
   var $histBtn = el("histBtn"), $histSheet = el("histSheet"), $histBack = el("histBack"),
-      $histList = el("histList"), $histClear = el("histClear");
+      $histList = el("histList"), $histClear = el("histClear"), $histCount = el("histCount"),
+      $histGrip = el("histGrip");
 
   function loadHist(){
     try{ var h = JSON.parse(localStorage.getItem(HIST_KEY)); if(h && h.length) hist = h.slice(0,HIST_MAX); }catch(e){}
@@ -805,12 +868,17 @@
   function saveHist(){ try{ localStorage.setItem(HIST_KEY, JSON.stringify(hist)); }catch(e){} }
 
   function capFirst(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
-  // hora sola para lo de hoy; día y mes para lo de antes
-  function histTime(ts){
+  // La fecha va una sola vez, como encabezado de grupo; cada línea sólo lleva la hora.
+  function dayKey(ts){ try{ return new Date(ts).toDateString(); }catch(e){ return String(ts); } }
+  function dayLabel(ts){
     try{
-      var d = new Date(ts), n = new Date();
-      if(d.toDateString() === n.toDateString()) return timeLabel(ts);
-      return d.toLocaleDateString("es-AR",{day:"numeric",month:"short"}) + " · " + timeLabel(ts);
+      var d = new Date(ts), n = new Date(), ayer = new Date(n.getTime() - 864e5);
+      if(d.toDateString() === n.toDateString()) return "Hoy";
+      if(d.toDateString() === ayer.toDateString()) return "Ayer";
+      var sameYear = d.getFullYear() === n.getFullYear();
+      return capFirst(d.toLocaleDateString("es-AR", sameYear
+        ? {weekday:"long", day:"numeric", month:"long"}
+        : {day:"numeric", month:"long", year:"numeric"}));
     }catch(e){ return ""; }
   }
   function fmtAmount(field, v){
@@ -841,23 +909,46 @@
     histTimer = setTimeout(recordNow, HIST_SETTLE);
   }
 
+  var EMPTY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>';
+
   function renderHist(){
     $histClear.hidden = hist.length === 0;
+    disarmClear();
+    $histCount.hidden = hist.length === 0;
+    $histCount.textContent = hist.length;
     if(!hist.length){
-      $histList.innerHTML = '<p class="hist-empty">Todavía no hay conversiones.<br>Las cuentas que hagas van a quedar acá.</p>';
+      $histList.innerHTML = '<div class="hist-empty">' + EMPTY_ICON +
+        '<strong>Todavía no hay conversiones</strong>' +
+        '<span>Las cuentas que hagas van a quedar acá,<br>listas para volver a abrirlas de un toque.</span></div>';
       return;
     }
+    var lastDay = "";
     $histList.innerHTML = hist.map(function(e, i){
-      var to = e.o.map(function(o){ return fmtAmount(o[0], o[1]); }).join('<span class="sep">·</span>');
-      return '<button type="button" class="hist-item" data-i="' + i + '">' +
-               '<span class="hist-line">' +
-                 '<span class="hist-from">' + fmtAmount(e.f, e.v) + '</span>' +
-                 '<span class="hist-arrow">→</span>' +
-                 '<span class="hist-to">' + to + '</span>' +
-               '</span>' +
-               '<span class="hist-meta">' + capFirst(labelFor(e.r)) + ' · ' + histTime(e.ts) + '</span>' +
-             '</button>';
+      var head = "";
+      var k = dayKey(e.ts);
+      if(k !== lastDay){ lastDay = k; head = '<p class="hist-day">' + dayLabel(e.ts) + '</p>'; }
+      var out = e.o.map(function(o){
+        return '<span class="hi-o ' + o[0] + '"><em>' + CUR[o[0]].code + '</em>' +
+               '<b>' + fmtAmount(o[0], o[1]) + '</b></span>';
+      }).join("");
+      return head +
+        '<button type="button" class="hist-item ' + e.f + '" data-i="' + i + '" ' +
+          'aria-label="Volver a cargar ' + fmtAmount(e.f, e.v) + '">' +
+          '<span class="hi-top">' +
+            '<span class="hi-mkt">' + capFirst(labelFor(e.r)) + '</span>' +
+            '<span class="hi-time">' + timeLabel(e.ts) + '</span>' +
+          '</span>' +
+          '<span class="hi-amt"><b>' + fmtAmount(e.f, e.v) + '</b><i>' + CUR[e.f].code + '</i></span>' +
+          '<span class="hi-out">' + out + '</span>' +
+        '</button>';
     }).join("");
+  }
+
+  // Borrar es irreversible: el primer toque arma, el segundo confirma.
+  var clearArmed = null;
+  function disarmClear(){
+    clearTimeout(clearArmed); clearArmed = null;
+    $histClear.classList.remove("arm"); $histClear.textContent = "Borrar";
   }
 
   function openHist(){
@@ -898,8 +989,46 @@
   $histBtn.addEventListener("click", function(){ haptic(8); histOpen() ? closeHist() : openHist(); });
   $histBack.addEventListener("click", closeHist);
   $histClear.addEventListener("click", function(){
-    hist = []; saveHist(); renderHist(); haptic(10);
+    if(!clearArmed){
+      haptic(8);
+      $histClear.classList.add("arm"); $histClear.textContent = "¿Borrar todo?";
+      clearArmed = setTimeout(disarmClear, 3500);
+      return;
+    }
+    hist = []; saveHist(); renderHist(); haptic(14);
   });
+
+  // Arrastrar la hoja hacia abajo la cierra; si se suelta antes, vuelve a su lugar.
+  (function(){
+    var y0 = 0, dy = 0, on = false;
+    function down(ev){
+      if(ev.target.closest("button")) return;   // el botón de borrar no arrastra
+      on = true; dy = 0; y0 = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      $histSheet.classList.add("dragging");
+    }
+    function move(ev){
+      if(!on) return;
+      var y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      dy = Math.max(0, y - y0);
+      if(dy > 0 && ev.cancelable) ev.preventDefault();
+      $histSheet.style.transform = "translate(-50%," + dy + "px)";
+      $histBack.style.opacity = String(Math.max(0, 1 - dy / 320));
+    }
+    function up(){
+      if(!on) return;
+      on = false;
+      $histSheet.classList.remove("dragging");
+      $histSheet.style.transform = ""; $histBack.style.opacity = "";
+      if(dy > 90){ haptic(8); closeHist(); }
+    }
+    $histGrip.addEventListener("touchstart", down, {passive:true});
+    $histGrip.addEventListener("touchmove", move, {passive:false});
+    $histGrip.addEventListener("touchend", up);
+    $histGrip.addEventListener("touchcancel", up);
+    $histGrip.addEventListener("mousedown", function(ev){ down(ev); ev.preventDefault(); });
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  })();
   $histList.addEventListener("click", function(ev){
     var btn = ev.target.closest(".hist-item"); if(!btn) return;
     var e = hist[parseInt(btn.getAttribute("data-i"),10)];
